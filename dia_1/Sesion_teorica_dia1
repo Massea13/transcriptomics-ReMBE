@@ -1,0 +1,62 @@
+- ## Sesión 1: Fundamentos, Entorno de Trabajo y Control de Calidad (4 horas)
+
+  **Objetivo**: Establecer las bases conceptuales y técnicas del análisis de RNA-seq, familiarizarse con el entorno HPC/Nextflow y realizar el control de calidad de los datos crudos.
+
+  **Teoría (1.5 horas)**:
+
+    Introducción al análisis de RNA-seq:
+
+  - Diseño experimental.
+  - Contrastes
+  - Réplicas biológicas y técnicas.
+  - Efecto del lote de secuenciación (Batch effect)
+  - Secuenciación Single-end vs. Paired-end, direccionalidad (strandedness)
+  - Formatos de archivo: FASTQ (estructura y calidad), FASTA (secuencias de referencia), GTF/GFF (anotación genómica).
+
+    
+
+  **Estrategias de análisis comparadas:**
+
+  - Cuantificación por referencia: Mapeo de lecturas a un genoma o transcriptoma de referencia conocido.
+  - Cuantificación sin referencia (*De novo*): Ensamblaje de lecturas para construir un transcriptoma *de novo*, para organismos sin genoma de referencia o no modelo.
+
+  **Presentación de los conjuntos de datos**
+
+  - *Abies religiosa* (Oyameles)
+  - *Genypterus maculatus* (Pex pistola)
+
+   
+
+  **Flujo de trabajo general de un pipeline de RNA-seq.**
+
+  Introducción a Nextflow y HPC:
+
+  Conceptos de paralelización, reproducibilidad y estructura básica de un pipeline (main.nf, nextflow.config).
+
+  **Práctica en HPC con Nextflow (2.5 horas):**
+
+  ​    1. Configuración del entorno: Acceso al cluster, carga de módulos (Nextflow, Java) y examinación del conjunto de datos (FASTQ, genoma de referencia y anotación) 
+
+  ​    2. Control de Calidad Inicial: Ejecución de FastQC sobre los archivos FASTQ crudos para evaluar la calidad de las bases, el contenido de GC, la presencia de adaptadores y las secuencias sobrerrepresentadas.
+
+  ​    3. Limpieza y Poda de Lecturas: Uso de Trimmomatic 
+
+  ​      Eliminar adaptadores.
+
+  ​      Recortar bases de baja calidad (umbral Q<30).
+
+  ​      Filtrar lecturas demasiado cortas.
+
+  ​      Manejo correcto de datos paired-end
+
+  ​    4. Control de Calidad Post-Limpieza: Reejecución de FastQC en los archivos filtrados para verificar la mejora de la calidad.
+
+      5. Reporte Agregado: Uso de MultiQC para compilar todos los reportes de FastQC en un solo informe HTML interactivo.
+
+  
+**Referencias**
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC12795997/pdf/main.pdf
+
+- https://monashbioinformaticsplatform.github.io/RNAseq_workshop_2024/experimental-design.html
+- https://researchgold.org/blog/rna-sequencing-analysis
+- https://hbctraining.github.io/Intro-to-rnaseq-fasrc-salmon-flipped/lessons/02_experimental_planning_considerations.html
