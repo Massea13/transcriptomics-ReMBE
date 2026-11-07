@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #SBATCH -J QC			# Nombre
 #SBATCH -p short		# Particion donde se ejecuta el job
 #SBATCH -N 1			# Numero de nodos
