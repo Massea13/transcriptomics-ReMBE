@@ -2,3 +2,6 @@
 ./quality-assessment/results/*
 ./scripts/*.err
 ./scripts/*.out
+./quality-assessment/.nextflow/*
+./quality-assessment/logs/*
+
