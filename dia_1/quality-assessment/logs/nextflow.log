@@ -1,0 +1,61 @@
+Nov-08 06:49:21.585 [main] DEBUG nextflow.cli.Launcher - $> nextflow run /home/idalia/transcriptomics-ReMBE/dia_1/scripts/01_main.nf -profile cluster --reads '/home/idalia/rembe_common/data/*.fastq.gz' --outdir /home/idalia/transcriptomics-ReMBE/dia_1/quality-assessment/results -with-report /home/idalia/transcriptomics-ReMBE/dia_1/quality-assessment/logs/report.html -with-trace /home/idalia/transcriptomics-ReMBE/dia_1/quality-assessment/logs/trace.txt -with-timeline /home/idalia/transcriptomics-ReMBE/dia_1/quality-assessment/logs/timeline.html -resume
+Nov-08 06:49:21.686 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.04.6
+Nov-08 06:49:21.720 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/idalia/.nextflow/plugins; core-plugins: nf-amazon@2.15.0,nf-azure@1.16.0,nf-cloudcache@0.4.3,nf-codecommit@0.2.3,nf-console@1.2.1,nf-google@1.21.1,nf-k8s@1.0.0,nf-tower@1.11.4,nf-wave@1.12.1
+Nov-08 06:49:21.753 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Nov-08 06:49:21.755 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Nov-08 06:49:21.760 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Nov-08 06:49:21.777 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Nov-08 06:49:21.851 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/idalia/.nextflow/secrets/store.json
+Nov-08 06:49:21.867 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@6dc1484] - activable => nextflow.secret.LocalSecretsProvider@6dc1484
+Nov-08 06:49:21.901 [main] WARN  nextflow.config.ConfigBuilder - It appears you have never run this project before -- Option `-resume` is ignored
+Nov-08 06:49:21.958 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
+Nov-08 06:49:22.030 [main] DEBUG nextflow.cli.CmdRun - Launching `/home/idalia/transcriptomics-ReMBE/dia_1/scripts/01_main.nf` [tender_descartes] DSL2 - revision: 5e5d323cb8
+Nov-08 06:49:22.034 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Nov-08 06:49:22.034 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Nov-08 06:49:22.136 [main] DEBUG nextflow.Session - Session UUID: 481cff84-312f-420f-bc95-2712e37a9630
+Nov-08 06:49:22.137 [main] DEBUG nextflow.Session - Run name: tender_descartes
+Nov-08 06:49:22.138 [main] DEBUG nextflow.Session - Executor pool size: 4
+Nov-08 06:49:22.152 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Nov-08 06:49:22.163 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=12; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Nov-08 06:49:22.308 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 25.04.6 build 5954
+  Created: 01-07-2025 11:27 UTC (05:27 CDT)
+  System: Linux 5.14.0-503.11.1.el9_5.x86_64
+  Runtime: Groovy 4.0.26 on OpenJDK 64-Bit Server VM 17.0.11+9
+  Encoding: UTF-8 (UTF-8)
+  Process: 2982498@wn5 [172.16.0.105]
+  CPUs: 4 - Mem: 251.8 GB (11.2 GB) - Swap: 0 (0)
+Nov-08 06:49:22.421 [main] DEBUG nextflow.Session - Work-dir: /home/idalia/transcriptomics-ReMBE/dia_1/scripts/quality-assessment/work [nfs]
+Nov-08 06:49:22.424 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /home/idalia/transcriptomics-ReMBE/dia_1/scripts/bin
+Nov-08 06:49:22.454 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Nov-08 06:49:22.484 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Nov-08 06:49:22.541 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
+Nov-08 06:49:22.623 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Nov-08 06:49:22.654 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 5; maxThreads: 1000
+Nov-08 06:49:22.845 [main] DEBUG nextflow.Session - Session start
+Nov-08 06:49:22.857 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /home/idalia/transcriptomics-ReMBE/dia_1/quality-assessment/logs/trace.txt
+Nov-08 06:49:24.294 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Nov-08 06:49:24.347 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_907b32ad861d1a70: /home/idalia/transcriptomics-ReMBE/dia_1/scripts/01_main.nf
+Nov-08 06:49:24.355 [main] DEBUG nextflow.Session - Session aborted -- Cause: No signature of method: nextflow.script.ScriptBinding.profiles() is applicable for argument types: () values: []
+Possible solutions: println()
+Nov-08 06:49:24.373 [main] ERROR nextflow.cli.Launcher - @unknown
+groovy.lang.MissingMethodException: No signature of method: nextflow.script.ScriptBinding.profiles() is applicable for argument types: () values: []
+Possible solutions: println()
+	at nextflow.script.WorkflowBinding.invokeMethod(WorkflowBinding.groovy:113)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.script.BaseScript.invokeMethod(BaseScript.groovy:155)
+	at org.codehaus.groovy.vmplugin.v8.IndyGuardsFiltersAndSignatures.invokeGroovyObjectInvoker(IndyGuardsFiltersAndSignatures.java:151)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_907b32ad861d1a70.runScript(Script_907b32ad861d1a70:20)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:159)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:193)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy:246)
+	at nextflow.script.parser.v1.ScriptLoaderV1.runScript(ScriptLoaderV1.groovy)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:246)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:139)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:379)
+	at nextflow.cli.Launcher.run(Launcher.groovy:513)
+	at nextflow.cli.Launcher.main(Launcher.groovy:673)
