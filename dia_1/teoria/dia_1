@@ -4,7 +4,7 @@
 
   **Teoría (1.5 horas)**:
 
-    Introducción al análisis de RNA-seq:
+#### 1. Introducción al análisis de RNA-seq:
 
   - Diseño experimental.
   - Contrastes
@@ -15,21 +15,60 @@
 
     
 
-  **Estrategias de análisis comparadas:**
+#### 2. Estrategias de análisis comparadas
 
   - Cuantificación por referencia: Mapeo de lecturas a un genoma o transcriptoma de referencia conocido.
+
   - Cuantificación sin referencia (*De novo*): Ensamblaje de lecturas para construir un transcriptoma *de novo*, para organismos sin genoma de referencia o no modelo.
 
-  **Presentación de los conjuntos de datos**
+##### 2.1 Presentación de los conjuntos de datos**
 
   - *Abies religiosa* (Oyameles)
   - *Genypterus maculatus* (Pex pistola)
 
    
 
-  **Flujo de trabajo general de un pipeline de RNA-seq.**
+#### 3. Flujo de trabajo general de un pipeline de RNA-seq.**
 
-  Introducción a Nextflow y HPC:
+  ***Introducción a Conda, Nextflow y HPC:***
+
+##### 3.1 ¿Qué es Conda?
+Conda es un **gestor de paquetes y de entornos (package and environment manager)** de código abierto. Se usa principalmente en bioinformática, ciencia de datos y computación científica para instalar software y sus dependencias de forma aislada y reproducible [source](https://www.anaconda.com/about-us#).
+
+**Gestor de paquetes**
+Instala software ya compilado ("binarios") desde repositorios como **Anaconda**, **conda-forge** o **bioconda**, resolviendo automáticamente las dependencias (bibliotecas, versiones compatibles, etc.). Ejemplo
+
+bash
+
+```
+conda install -c bioconda fastqc multiqc
+```
+
+**Gestor de entornos**
+Crea espacios aislados donde cada proyecto tiene sus propias versiones de software, sin interferir entre sí ni con el sistema.
+
+bash
+```
+conda create -n rembe_qc -c bioconda -c conda-forge fastqc multiqc
+conda activate rembe_qc    # entras al entorno
+conda deactivate           # sales del entorno
+```
+
+##### 3.2 ¿Qué es Nextflow?
+Nextflow es un motor de orquestación de flujos de trabajo y un lenguaje específico de dominio (DSL: Domain Specific Languge) de código abierto, diseñado principalmente para facilitar la escritura y ejecución de flujos de trabajo computacionales intensivos en datos . En el ámbito de la bioinformática, **se utiliza comúnmente para conectar diversas herramientas de análisis (como FastQC, MultiQC, alineadores, etc.) ** y construir procesos de análisis reproducibles, portables y escalables
+Pregunta.  Cual es la ventaja de usar  conda o nextflow en un entono  como los HPCC?
+
+
+
+*Si quisieras hornear un pastel, ¿qué tareas ejecutaría Conda y cuáles corresponderían a Nextflow?*
+
+<!--
+Lista de ingredientes exactos → environment.yml  (parte de Conda)
+Almacén que provee los ingredientes       → 		Conda
+Receta (pasos y orden) + chef       → 			Nextflow
+-->
+
+
 
   Conceptos de paralelización, reproducibilidad y estructura básica de un pipeline (main.nf, nextflow.config).
 
@@ -54,6 +93,11 @@
       5. Reporte Agregado: Uso de MultiQC para compilar todos los reportes de FastQC en un solo informe HTML interactivo.
 
   
+
+
+
+
+
 **Referencias**
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC12795997/pdf/main.pdf
 
