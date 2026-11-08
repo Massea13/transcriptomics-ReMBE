@@ -66,7 +66,26 @@ Lista de ingredientes exactos → environment.yml  (parte de Conda)
 Almacén que provee los ingredientes       → 		Conda
 Receta (pasos y orden) + chef       → 			Nextflow
 -->
-**2. Pregunta.  Cual es la ventaja de usar  conda o nextflow en un entono  como los HPCC?**
+
+##### Conda vs Nextflow
+
+- **Conda** → gestiona **software** (qué programas y qué versiones hay instalados).
+- **Nextflow** → gestiona **ejecución** (en qué orden se ejecutan los programas y en qué máquina).
+
+
+| Aspecto                 | **Conda**                                                    | **Nextflow**                                                 |
+| :---------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| **Qué es**              | Gestor de paquetes y entornos                                | Motor de orquestación de flujos de trabajo                   |
+| **Qué gestiona**        | **Software**: instala/aisla versiones de programas (FastQC, Python, Java…) | **Ejecución**: orden, paralelismo, dependencias entre pasos, reintentos |
+| **Unidad de trabajo**   | Un **paquete** (p. ej. `fastqc=0.12.1`)                      | Un **proceso** (p. ej. ejecutar FastQC sobre una muestra)    |
+| **Aísla**               | Entornos de software (`rembe_qc`, `rembe_align`…)            | Pasos del pipeline y su ejecución (local, SLURM, nube)       |
+| **Lenguaje**            | Comandos de shell (`conda install/create/activate`)          | DSL propio (`main.nf`: `process`, `workflow`, `channel`)     |
+| **Escala**              | Un entorno por proyecto/máquina                              | Miles de tareas en paralelo en un clúster o nube             |
+| **Reproducibilidad**    | Fija **versiones de software** (`environment.yml`)           | Fija **el flujo completo** + puede fijar software vía contenedores/Conda |
+| **Reanudar tras fallo** | ❌ No aplica                                                  | ✅ `-resume` (omite pasos ya hechos)                          |
+| **Se ejecuta en**       | Tu shell / nodo                                              | Local, SLURM, SGE, Kubernetes, AWS…                          |
+
+
 
 #### 4. ¿Qué es la computación de alto rendimiento (HPC)?
 
@@ -75,6 +94,18 @@ La HPC es una tecnología que utiliza clústeres de potentes procesadores que tr
 La HPC resuelve en tiempo real algunos de los problemas informáticos más complejos de la actualidad. Los sistemas HPC suelen funcionar a velocidades más de un millón de veces superiores a las de los sistemas básicos más rápidos de ordenadores de sobremesa, portátiles o servidores [fuente](https://www.ibm.com/es-es/think/topics/hpc).
 
 
+
+**1. Pregunta.  Cual es la ventaja de usar  conda y/o nextflow en un entono  como los HPC?**
+
+<!--
+Conda: Resuelve el problema de las dependencias de software
+
+La ventaja de Conda en HPC es que **proporciona entornos de software aislados y reproducibles**, permitiéndote evitar el sistema de "módulos" (modules) del clúster, que es lento y a veces restrictivo.
+
+Nextflow: Resuelve el problema de la orquestación de flujos de trabajo
+
+La ventaja de Nextflow en HPC es que **abstrae la complejidad de la programación de trabajos**, permitiéndote gestionar la paralización, el manejo de errores y la migración entre plataformas con código simple.
+--> 
 
 
 
@@ -107,6 +138,11 @@ La HPC resuelve en tiempo real algunos de los problemas informáticos más compl
       5. Reporte Agregado: Uso de MultiQC para compilar todos los reportes de FastQC en un solo informe HTML interactivo.
 
   
+
+
+
+
+
 
 
 
