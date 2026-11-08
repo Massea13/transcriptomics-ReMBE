@@ -17,6 +17,15 @@ module load spack/1.0.2
 module load jdk/21.0.2-gcc-12.2.0-linux-almalinux9-x86_64-tsyhzjs
 module load nextflow
 
+# Forzar el uso del Java del módulo del clúster, sobrescribiendo JAVA_HOME de Conda
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+export JAVA_CMD="${JAVA_HOME}/bin/java"
+export PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Verificar
+java -version
+echo "JAVA_HOME=${JAVA_HOME}"
+
 #----------------------------------------
 # 2. Instalar Miniconda si no existe
 #----------------------------------------
