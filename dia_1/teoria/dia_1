@@ -56,21 +56,35 @@ conda deactivate           # sales del entorno
 
 ##### 3.2 ¿Qué es Nextflow?
 Nextflow es un motor de orquestación de flujos de trabajo y un lenguaje específico de dominio (DSL: Domain Specific Languge) de código abierto, diseñado principalmente para facilitar la escritura y ejecución de flujos de trabajo computacionales intensivos en datos . En el ámbito de la bioinformática, **se utiliza comúnmente para conectar diversas herramientas de análisis (como FastQC, MultiQC, alineadores, etc.) ** y construir procesos de análisis reproducibles, portables y escalables
-Pregunta.  Cual es la ventaja de usar  conda o nextflow en un entono  como los HPCC?
 
 
 
-*Si quisieras hornear un pastel, ¿qué tareas ejecutaría Conda y cuáles corresponderían a Nextflow?*
+**1. Si quisieras hornear un pastel, ¿qué tareas ejecutaría Conda y cuáles corresponderían a Nextflow?**
 
 <!--
 Lista de ingredientes exactos → environment.yml  (parte de Conda)
 Almacén que provee los ingredientes       → 		Conda
 Receta (pasos y orden) + chef       → 			Nextflow
 -->
+**2. Pregunta.  Cual es la ventaja de usar  conda o nextflow en un entono  como los HPCC?**
+
+#### 4. ¿Qué es la computación de alto rendimiento (HPC)?
+
+La HPC es una tecnología que utiliza clústeres de potentes procesadores que trabajan en paralelo para procesar conjuntos de datos masivos y multidimensionales y resolver problemas complejos a velocidades extremadamente altas.
+
+La HPC resuelve en tiempo real algunos de los problemas informáticos más complejos de la actualidad. Los sistemas HPC suelen funcionar a velocidades más de un millón de veces superiores a las de los sistemas básicos más rápidos de ordenadores de sobremesa, portátiles o servidores [fuente](https://www.ibm.com/es-es/think/topics/hpc).
 
 
 
-  Conceptos de paralelización, reproducibilidad y estructura básica de un pipeline (main.nf, nextflow.config).
+
+
+#### 5. Conceptos de paralelización, reproducibilidad y estructura básica de un pipeline (main.nf, nextflow.config).
+
+
+
+
+
+
 
   **Práctica en HPC con Nextflow (2.5 horas):**
 
@@ -98,9 +112,12 @@ Receta (pasos y orden) + chef       → 			Nextflow
 
 
 
+
+
 **Referencias**
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC12795997/pdf/main.pdf
 
 - https://monashbioinformaticsplatform.github.io/RNAseq_workshop_2024/experimental-design.html
 - https://researchgold.org/blog/rna-sequencing-analysis
 - https://hbctraining.github.io/Intro-to-rnaseq-fasrc-salmon-flipped/lessons/02_experimental_planning_considerations.html
+- [IBM](https://www.ibm.com/es-es/think/topics/hpc)
