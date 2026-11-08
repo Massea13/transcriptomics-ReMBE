@@ -68,10 +68,22 @@ home="/home/idalia/transcriptomics-ReMBE/dia_1"
 data="/home/idalia/rembe_common/data"
 scripts="/home/idalia/transcriptomics-ReMBE/dia_1/scripts"
 
-# Crear estructura de trabajo
-mkdir -p "${home}/${project}"/{work,results,logs}
-cd "${home}/${project}"
+# Crear estructura de trabajo si no existe
+if [ ! -d "${home}/${project}" ]; then
+    echo "[INFO] El directorio ${home}/${project} no existe. Creando estructura..."
+    mkdir -p "${home}/${project}"/{work,results,logs}
+else
+    echo "[INFO] El directorio ${home}/${project} ya existe. Verificando subdirectorios..."
+    mkdir -p "${home}/${project}"/{work,results,logs}
+fi
 
+# Crear el directorio de scripts si no existe (está fuera de ${home}/${project})
+if [ ! -d "${scripts}" ]; then
+    echo "[INFO] Creando directorio de scripts: ${scripts}"
+    mkdir -p "${scripts}"
+fi
+
+cd "${home}/${project}"
 #----------------------------------------
 # 5. Ejecutar Nextflow (dentro del job, con srun para que use los cores)
 #----------------------------------------
@@ -80,7 +92,7 @@ export NXF_LOG_FILE="${home}/${project}/logs/nextflow.log"
 
 srun nextflow run "${scripts}/01_main.nf" \
     -profile cluster \
-    --reads  "${data}/*.fastq.gz" \
+    --reads  "${data}/fastq/*.fastq.gz" \
     --outdir "${home}/${project}/results" \
     -with-report "${home}/${project}/logs/report.html" \
     -with-trace  "${home}/${project}/logs/trace.txt" \
