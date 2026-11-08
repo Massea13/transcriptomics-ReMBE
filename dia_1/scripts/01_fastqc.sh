@@ -78,7 +78,7 @@ cd "${home}/${project}"
 export NXF_WORK="${scripts}/${project}/work"
 export NXF_LOG_FILE="${home}/${project}/logs/nextflow.log"
 
-srun nextflow run "${scripts}/main.nf" \
+srun nextflow run ./01_main.nf \
     -profile cluster \
     --reads  "${data}/*.fastq.gz" \
     --outdir "${home}/${project}/results" \
