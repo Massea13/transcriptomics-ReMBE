@@ -66,7 +66,7 @@ multiqc --version
 project="quality-assessment"
 home="/home/idalia/transcriptomics-ReMBE/dia_1"
 data="/home/idalia/rembe_common/data"
-scripts="{$home}/scripts"
+scripts="/home/idalia/transcriptomics-ReMBE/dia_1/scripts"
 
 # Crear estructura de trabajo
 mkdir -p "${home}/${project}"/{work,results,logs}
@@ -78,7 +78,7 @@ cd "${home}/${project}"
 export NXF_WORK="${scripts}/${project}/work"
 export NXF_LOG_FILE="${home}/${project}/logs/nextflow.log"
 
-srun nextflow run ./01_main.nf \
+srun nextflow run "${scripts}/01_main.nf" \
     -profile cluster \
     --reads  "${data}/*.fastq.gz" \
     --outdir "${home}/${project}/results" \
