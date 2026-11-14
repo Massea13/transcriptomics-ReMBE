@@ -316,9 +316,9 @@ Se elige de novo cuando la referencia no sirve para la pregunta; sus límites se
 
 ### Fuentes consultadas para este documento
 
-- [Documentación de Salmon, versión 1.3.0](https://gensoft.pasteur.fr/docs/salmon/1.3.0/salmon.html): el alineamiento selectivo es la estrategia por defecto desde la 1.0.0.
-- https://salmon.readthedocs.io/en/latest/salmon.html): efecto de un k menor con alineamiento selectivo.
-- (https://gannet.fish.washington.edu/Atumefaciens/20200429_cbai_salmon_2020GW_transcript_abundances/program_options.log): `--validateMappings` figura como obsoleta y sin efecto.
-- [Guía de Trinity en Galaxy](https://toolshed.g2.bx.psu.edu/repos/iuc/trinity/file/tip/README.rst): cita de la FAQ de Trinity, aproximadamente 1 GB de RAM por millón de lecturas.
+- [Documentación de Salmon, versión 1.3.0](https://gensoft.pasteur.fr/docs/salmon/1.3.0/salmon.html)
+- https://salmon.readthedocs.io/en/latest/salmon.html)
+- (https://gannet.fish.washington.edu/Atumefaciens/20200429_cbai_salmon_2020GW_transcript_abundances/program_options.log)
+- [Guía de Trinity en Galaxy](https://toolshed.g2.bx.psu.edu/repos/iuc/trinity/file/tip/README.rst).
 
 
