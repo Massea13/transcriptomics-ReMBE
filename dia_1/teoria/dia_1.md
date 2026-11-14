@@ -1,13 +1,8 @@
-- ## Sesión 1: Fundamentos, Entorno de Trabajo y Control de Calidad (4 horas)
+## Sesión 1: Fundamentos, Entorno de Trabajo y Control de Calidad (4 horas)
 
   **Objetivo**: Establecer las bases conceptuales y técnicas del análisis de RNA-seq, familiarizarse con el entorno HPC/Nextflow y realizar el control de calidad de los datos crudos.
 
   **Teoría (1.5 horas)**:
-
-**Curso:** Análisis de Transcriptomas en el contexto de la Biología Evolutiva  
-**Sesión 1:** Fundamentos, Entorno de Trabajo y Control de Calidad (4 horas)  
-**Objetivo:** Establecer las bases conceptuales y técnicas del análisis de RNA-seq, familiarizarse con el entorno HPC/Nextflow y realizar el control de calidad de los datos crudos.
-
 
 ## 1. Introducción al análisis de RNA-seq
 
@@ -38,7 +33,6 @@ El diseño experimental es el paso más crítico para garantizar la validez y re
 
 - **Réplicas técnicas:** Generalmente **no son necesarias** debido a la baja variación técnica de RNA-seq. La reproducibilidad técnica es alta y está bien controlada por el protocolo.
 
-  
 
 ![Diseno experimental](<./images/02_DesigningRNAsequencingexperiment.png>)
 
