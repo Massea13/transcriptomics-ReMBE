@@ -14,26 +14,6 @@ params.reads    = null          // p.ej. "/path/data/*.fastq.gz"
 params.outdir   = "results"
 params.threads  = 4
 
-//----------------------------------------
-// Perfiles: conda (local) y cluster (SLURM)
-//----------------------------------------
-profiles {
-    conda {
-        conda.enabled = true
-    }
-    cluster {
-        process.executor = 'slurm'
-        process.queue    = 'short'
-        process.cpus     = 2
-        process.memory   = '4 GB'
-        process.time     = '1h'
-        conda.enabled    = true
-    }
-    local {
-        process.executor = 'local'
-        conda.enabled    = false
-    }
-}
 
 //----------------------------------------
 // Canales

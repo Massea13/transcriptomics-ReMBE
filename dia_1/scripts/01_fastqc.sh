@@ -95,14 +95,11 @@ srun nextflow run "${scripts}/01_main.nf" \
     -profile cluster \
     --reads  "${data}/RAW/*.fastq.gz" \
     --outdir "${home}/${project}/results" \
+    --adapters "/ruta/a/tus/adapters.fa" \
     -with-report "${home}/${project}/logs/report.html" \
     -with-trace  "${home}/${project}/logs/trace.txt" \
     -with-timeline "${home}/${project}/logs/timeline.html" \
     -resume
-
-echo "[INFO] Quality assessment completado."
-
-
 
 
 #Remover  todos los módulos cargados
