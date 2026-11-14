@@ -333,6 +333,6 @@ Un pipeline reproducible debe:
 - Lee, G.-Y. et al. (2024). Brief guide to RNA sequencing analysis for nonexperts in bioinformatics. *Molecules and Cells*, 47(5):100060.
 - Pasmanik-Chor, M. (2021). Biological Perspectives of RNA-Sequencing Experimental Design. *Methods in Molecular Biology*.
 - Zhao, S. et al. (2018). Evaluation of two main RNA-seq approaches for gene quantification in clinical RNA sequencing: PolyA+ selection versus rRNA depletion. *Scientific Reports*, 8:4781.
-- NCI BTEP. Introduction to RNA-Seq Data Analysis (Peter FitzGerald). [https://bioinformatics.ccr.cancer.gov/docs/bioinformatics-for-beginners-2025/RNASeq_2024.pdf]
+- NCI BTEP. Introduction to RNA-Seq Data Analysis [Peter FitzGerald](https://bioinformatics.ccr.cancer.gov/docs/bioinformatics-for-beginners-2025/RNASeq_2024.pdf)
 - Bioconda documentation: https://bioconda.github.io/
 - Nextflow documentation: https://nextflow.io/
