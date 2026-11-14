@@ -5,4 +5,5 @@
 ./quality-assessment/.nextflow/*
 ./quality-assessment/logs/*
 ./resultados/*
+./quality-assessment/.nextflow/
 
