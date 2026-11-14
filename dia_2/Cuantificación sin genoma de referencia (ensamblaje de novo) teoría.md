@@ -6,9 +6,9 @@ Esta sección enseña a cuantificar la expresión génica cuando no hay genoma n
 
 | Bloque | Tema | Tiempo | Idea central |
 | --- | --- | --- | --- |
-| 1 | Consideraciones biológicas | 15 min | De novo es una decisión biológica; sus límites (isoformas, quimeras, redundancia) se miden y se mitigan |
-| 2 | Pseudoalineamiento: Salmon y Kallisto | 15 min | Cuantificar sin alinear base a base: compatibilidad de k-mers y EM |
-| 3 | Estructura de índices | 15 min | Qué archivos hacen falta, cómo se construye el índice y qué errores evitar |
+| 4| Consideraciones biológicas | 15 min | De novo es una decisión biológica; sus límites (isoformas, quimeras, redundancia) se miden y se mitigan |
+| 5 | Pseudoalineamiento: Salmon y Kallisto | 15 min | Cuantificar sin alinear base a base: compatibilidad de k-mers y EM |
+| 6 | Estructura de índices | 15 min | Qué archivos hacen falta, cómo se construye el índice y qué errores evitar |
 
 ## Flujo general
 
