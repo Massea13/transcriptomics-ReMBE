@@ -1,24 +1,39 @@
-## Usuarios Mac
+## Usuarios Linux
 
-En Mac podemos encontrar la consola en el icono llamado **Terminal**, que ya viene instalado en la computadora. Puedes ubicarla directamente en tu **Dock** (la barra de herramientas que aparece en el borde inferior o lateral de tu pantalla):
+En Linux (Ubuntu) podemos encontrar la consola en el icono llamado **Terminal**, que ya viene instalada en la computadora. Puedes ubicarla al  hacer click en  el icono **Show Apps**
 
-![Icono de Terminal en el Dock](FIGURES/Figura_1MAC.png)
+<img src="FIGURES/01_ShowApps.png" alt="Show Apss" style="zoom:50%;" />
 
-También puedes abrirla siguiendo esta ruta: **Launchpad** $\rightarrow$ **Otras** $\rightarrow$ **Terminal**.
 
-![Abrir Launchpad](FIGURES/Figura_2MAC.png)
-![Carpeta Otras en Launchpad](FIGURES/Figura_3MAC.png)
-![Icono de Terminal en Launchpad](FIGURES/Figura_4MAC.png)
 
-Para iniciar la consola, haz doble clic sobre el icono **Terminal** y se abrirá una ventana similar a la siguiente:
+En el icono de búsqueda introduce el texto **Terminal** y haz click en el icono para desplegarla
 
-![Ventana inicial de la Terminal en macOS](FIGURES/Figura_5MAC.png)
+![Type Terminal](FIGURES/02_LookForTerminal.png)
+
+### Atajo
+
+También puedes abrir la terminal directamente con el comando **Ctrl + Alt + T**
+
+
+
+### Conexion al servidor
 
 Una vez abierta la **Terminal**, deberás conectarte al clúster ingresando tu usuario y contraseña mediante `ssh`:
 
-![Comando de conexión SSH](FIGURES/Figura_6MAC.png)
-![Ingreso de contraseña en Terminal](FIGURES/Figura_7MAC.png)
+```
+ssh usuario@cluster.lancis.ecologia.unam.mx
+```
+
+![Comando de conexión SSH](FIGURES/03_ssh_connection.png)
+
+
+
+Ingresa la contraseña asociada a tu usuario. Para ello puedes copiarla  (Ctrl + C) y pegarla (Ctrl + shift + V)
+
+**PRECACIÓN** Si ingresas erróneamente la contrasena tres veces consecutivas, tu usuario sera bloqueado.
+
+![Ingreso de contraseña en Terminal](FIGURES/04_enter_password.png)
 
 Al ingresar al clúster recibirás el mensaje de bienvenida junto con un breve manual que podrás explorar usando el comando `more`. Con esto estarás list@ para trabajar durante el taller:
 
-![Pantalla de bienvenida del clúster](FIGURES/Figura_8MAC.png)
+![Pantalla de bienvenida del clúster](FIGURES/05_access_cluster.png)
