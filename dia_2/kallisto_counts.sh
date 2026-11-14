@@ -8,8 +8,9 @@
 #SBATCH --output=kallisto_%A_%a.out
 #SBATCH --error=kallisto_%A_%a.err
 
-
-module load apps/bioinf
+module purge
+module load spack/1.0.2
+module load miniconda3
 module load apps/kallisto/0.43.0
 
 # -------------------------
