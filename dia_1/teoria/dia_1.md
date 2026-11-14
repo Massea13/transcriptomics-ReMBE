@@ -104,7 +104,7 @@ Contiene secuencias de nucleótidos o aminoácidos. La primera línea comienza c
 #### GTF/GFF (anotación genómica)
 Archivos tabulados que describen las características del genoma (genes, transcritos, exones, CDS) con sus coordenadas. **GTF** (Gene Transfer Format) es el estándar para análisis de expresión; **GFF** (General Feature Format) es más general. Ambos pueden convertirse entre sí. La anotación es esencial para asignar lecturas mapeadas a genes o transcritos y generar la matriz de conteos.
 
-**Nota crítica:** La versión del genoma y la fuente de anotación (Ensembl, RefSeq, GENCODE) deben documentarse y mantenerse consistentes a lo largo del análisis y para comparaciones con estudios previos.
+**Nota:** La versión del genoma y la fuente de anotación (Ensembl, RefSeq, GENCODE) deben documentarse y mantenerse consistentes a lo largo del análisis y para comparaciones con estudios previos.
 
 
 ## 2. Estrategias de Análisis Comparadas
@@ -136,13 +136,13 @@ Para organismos sin genoma de referencia o con genomas incompletos. Las lecturas
 .
 - ***Genypterus maculatus*** (Pex pistola): pez marino de interés comercial, el set de datos fue generado para la publicacion: [Fuente]().
 
-**Implicación:** Cuando se requiere un  ensamblaje *de novo* es aún más crítico el control de calidad y el diseño experimental riguroso.
+**Nota:** Cuando se requiere un  ensamblaje *de novo* es aún más crítico el control de calidad y el diseño experimental riguroso.
 
 ## 3. Flujo de Trabajo General de un Pipeline de RNA-seq
 
 El análisis de RNA-seq se divide en dos grandes etapas:
 
-1. **Análisis primario:** FASTQ → Matriz de conteos (QC, limpieza, alineamiento/mapeo, cuantificación).
+1. **Análisis primario o preprocesaminto:** FASTQ → Matriz de conteos (QC, limpieza, alineamiento/mapeo, cuantificación).
 2. **Análisis secundario y terciario:** Matriz de conteos → Expresión diferencial → Interpretación biológica (análisis de enriquecimiento, vías, etc.).
 
 ![image-20261114073700523](./images/03_RNAseqPipeline.png)
@@ -153,7 +153,7 @@ Fig 2. RNAseq pipeline (Dawadi et al. 2025)
 
 ### 3.1 Introducción a Conda, Nextflow y HPC
 
-#### ¿Qué es Conda?
+#### 3.1.1 ¿Qué es Conda?
 Conda es un **gestor de paquetes y de entornos (package and environment manager)** de código abierto. Se usa principalmente en bioinformática, ciencia de datos y computación científica para instalar software y sus dependencias de forma aislada y reproducible [source](https://www.anaconda.com/about-us#).
 
 **Gestor de paquetes**
@@ -175,7 +175,7 @@ conda activate rembe_qc    # entras al entorno
 conda deactivate           # sales del entorno
 ```
 
-#### ¿Qué es Nextflow?
+#### 3.1.2 ¿Qué es Nextflow?
 Nextflow es un motor de orquestación de flujos de trabajo y un lenguaje específico de dominio (DSL: Domain Specific Languge) de código abierto, diseñado principalmente para facilitar la escritura y ejecución de flujos de trabajo computacionales intensivos en datos . En  bioinformática, ** usualmente se utiliza  para conectar diversas herramientas de análisis (como FastQC, MultiQC, alineadores, etc.) ** y construir procesos de análisis reproducibles, portables y escalables
 
 
@@ -198,7 +198,7 @@ Almacén que provee los ingredientes       → 		Conda
 Receta (pasos y orden) + chef       → 			Nextflow
 -->
 
-#### Conda vs Nextflow
+#### 3.1.3 Conda vs Nextflow
 
 - **Conda** → gestiona **software** (qué programas y qué versiones hay instalados).
 - **Nextflow** → gestiona **ejecución** (en qué orden se ejecutan los programas y en qué máquina).
@@ -218,7 +218,7 @@ Receta (pasos y orden) + chef       → 			Nextflow
 
 
 
-#### 4. ¿Qué es la computación de alto rendimiento (HPC)?
+####  3.1.4 ¿Qué es la computación de alto rendimiento (HPC)?
 
 La HPC es una tecnología que utiliza clústeres de potentes procesadores que trabajan en paralelo para procesar conjuntos de datos masivos y multidimensionales y resolver problemas complejos a velocidades extremadamente altas.
 
@@ -241,6 +241,29 @@ Nextflow: Resuelve el problema de la orquestación de flujos de trabajo
 
 La ventaja de Nextflow en HPC es que **abstrae la complejidad de la programación de trabajos**, permitiéndote gestionar la paralización, el manejo de errores y la migración entre plataformas con código simple.
 --> 
+
+### 3.2. Conceptos de Paralelización, Reproducibilidad y Estructura de un Pipeline
+
+#### 3.2.1 Paralelización
+
+Nextflow y SLURM permiten ejecutar procesos en paralelo de forma automática. Por ejemplo, si se tienen 12 muestras, FastQC puede ejecutarse simultáneamente para todas ellas (si los recursos del clúster lo permiten), reduciendo drásticamente el tiempo total. El `nextflow.config` define los recursos (CPUs, memoria, tiempo) para cada proceso y el ejecutor (local, SLURM, etc.).
+
+#### 3.2.2 Reproducibilidad
+
+Un pipeline reproducible debe:
+
+- Fijar versiones de software (Conda `environment.yml` o contenedores).
+- Documentar parámetros y versiones de referencia.
+- Usar control de versiones (Git) para los scripts.
+- Permitir la re-ejecución con `-resume`.
+
+#### 3.2.3 Estructura básica de un pipeline Nextflow
+
+- **`main.nf`:** Define los procesos (`process`) y el flujo de trabajo (`workflow`). Los canales (`Channel`) conectan las salidas de un proceso con las entradas del siguiente.
+- **`nextflow.config`:** Configura el ejecutor, los recursos, los parámetros del pipeline y los perfiles (ej. `slurm`, `local`).
+
+
+## Pausa (20 min)
 
 
 ## 4. Práctica en HPC con Nextflow (2.5 horas)
@@ -300,28 +323,7 @@ Re-ejecutar FastQC sobre los archivos filtrados para verificar:
 - Comparación visual entre muestras.
 - Documentación de la calidad del experimento.
 
-**Comando:** `multiqc .` (ejecutado en el directorio que contiene los reportes de FastQC).
-
-
-## 5. Conceptos de Paralelización, Reproducibilidad y Estructura de un Pipeline
-
-### 5.1 Paralelización
-
-Nextflow y SLURM permiten ejecutar procesos en paralelo de forma automática. Por ejemplo, si se tienen 12 muestras, FastQC puede ejecutarse simultáneamente para todas ellas (si los recursos del clúster lo permiten), reduciendo drásticamente el tiempo total. El `nextflow.config` define los recursos (CPUs, memoria, tiempo) para cada proceso y el ejecutor (local, SLURM, etc.).
-
-### 5.2 Reproducibilidad
-
-Un pipeline reproducible debe:
-
-- Fijar versiones de software (Conda `environment.yml` o contenedores).
-- Documentar parámetros y versiones de referencia.
-- Usar control de versiones (Git) para los scripts.
-- Permitir la re-ejecución con `-resume`.
-
-### 5.3 Estructura básica de un pipeline Nextflow
-
-- **`main.nf`:** Define los procesos (`process`) y el flujo de trabajo (`workflow`). Los canales (`Channel`) conectan las salidas de un proceso con las entradas del siguiente.
-- **`nextflow.config`:** Configura el ejecutor, los recursos, los parámetros del pipeline y los perfiles (ej. `slurm`, `local`).
+**Comando:** `multiqc .` (ejecutado en el directorio que contiene los reportes de FastQC). 
 
 ---
 
