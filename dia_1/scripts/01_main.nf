@@ -37,7 +37,7 @@ fastq_pairs.view()
 process FASTQC_RAW {
     tag "${sample}"
     publishDir "${params.outdir}/fastqc_raw", mode: 'copy'
-    conda 'bioconda::fastqc=0.12.1'
+    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
 
     input:
     tuple val(sample), path(fastqs)
@@ -57,7 +57,7 @@ process FASTQC_RAW {
 process TRIM {
     tag "${sample}"
     publishDir "${params.outdir}/trimmed", mode: 'copy'
-    conda 'bioconda::trimmomatic=0.39'
+    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
 
     input:
     tuple val(sample), path(reads)
@@ -85,7 +85,7 @@ process TRIM {
 process FASTQC_TRIMMED {
     tag "${sample}"
     publishDir "${params.outdir}/fastqc_trimmed", mode: 'copy'
-    conda 'bioconda::fastqc=0.12.1'
+    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
 
     input:
     tuple val(sample), path(r1), path(r2)
@@ -105,8 +105,8 @@ process FASTQC_TRIMMED {
 process MULTIQC {
     tag "all_samples"
     publishDir "${params.outdir}/multiqc", mode: 'copy'
-    conda 'bioconda::multiqc=1.21'
-
+    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
+    
     input:
     path raw_zips
     path trim_zips

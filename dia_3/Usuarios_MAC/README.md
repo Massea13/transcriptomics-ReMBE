@@ -4,7 +4,7 @@ En Mac podemos encontrar la consola en el icono llamado **Terminal**, que ya vie
 
 ![Icono de Terminal en el Dock](FIGURES/Figura_1MAC.png)
 
-También puedes abrirla siguiendo esta ruta: **Launchpad** $\rightarrow$ **Otras** $\rightarrow$ **Terminal**.
+También puedes abrirla siguiendo esta ruta: **Launchpad** -> **Otras** -> **Terminal**.
 
 ![Abrir Launchpad](FIGURES/Figura_2MAC.png)
 ![Carpeta Otras en Launchpad](FIGURES/Figura_3MAC.png)
@@ -19,6 +19,6 @@ Una vez abierta la **Terminal**, deberás conectarte al clúster ingresando tu u
 ![Comando de conexión SSH](FIGURES/Figura_6MAC.png)
 ![Ingreso de contraseña en Terminal](FIGURES/Figura_7MAC.png)
 
-Al ingresar al clúster recibirás el mensaje de bienvenida junto con un breve manual que podrás explorar usando el comando `more`. Con esto estarás list@ para trabajar durante el taller:
+Al ingresar al clúster recibirás el mensaje de bienvenida junto con un breve manual que podrás explorar usando el comando `more` seguido del nombre del archivo guia_rapida_uso.txt (`more /guia_rapida_uso.txt`). Con esto estarás list@ para trabajar durante el taller:
 
 ![Pantalla de bienvenida del clúster](FIGURES/Figura_8MAC.png)
