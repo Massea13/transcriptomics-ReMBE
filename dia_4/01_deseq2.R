@@ -1,45 +1,47 @@
 # =============================================================================
 # 01_deseq2.R - Expresion diferencial con DESeq2 a partir de kallisto
-# Uso: correlo por secciones en RStudio, o completo con Rscript 01_deseq2.R
-# Necesita: samples.tsv con las columnas sample_id y condition
+# Uso en RStudio: corre linea por linea (Ctrl+Enter) o por secciones.
+# Necesita: metadata_peces.csv (columnas sample_id, Sample, condition, ...)
+#           y txi_deseq2.rds (generado con 00_exportar_counts.R)
 # =============================================================================
 
-library(tximport)
 library(DESeq2)
 library(ggplot2)
 library(pheatmap)
 
 # -------------------------
-# Rutas y parametros
+# Carpeta de trabajo y parametros
 # -------------------------
-KALLISTO_DIR <- "kallisto_counts"   # Carpeta con una subcarpeta por muestra
-SAMPLES      <- "samples.tsv"
-OUT_DIR      <- "resultados_deseq2"
-REFERENCIA   <- "control"           # Nivel de 'condition' contra el que se compara
-PADJ         <- 0.05
-LFC          <- 1
+setwd("~/para_RStudio")
+
+OUT_DIR    <- "resultados_deseq2"
+REFERENCIA <- "control"     # Nivel de 'condition' contra el que se compara
+PADJ       <- 0.05
+LFC        <- 1
+colores    <- c("steelblue", "firebrick")
 
 dir.create(OUT_DIR, showWarnings = FALSE)
 
 # -------------------------
-# 1. Metadatos
+# 1. Metadatos y cuentas
 # -------------------------
-meta <- read.delim(SAMPLES)
+meta <- read.csv("metadata_peces.csv")
 rownames(meta) <- meta$sample_id
 meta$condition <- relevel(factor(meta$condition), ref = REFERENCIA)
-meta
+
+txi <- readRDS("txi_deseq2.rds")
+
+# MUY IMPORTANTE: metadatos en el mismo orden que las columnas de las cuentas
+meta <- meta[colnames(txi$counts), ]
+stopifnot(identical(rownames(meta), colnames(txi$counts)))
+meta[, c("sample_id", "Sample", "condition")]   # Revisar: 1C-4C control, 5H-8H calor
 
 # -------------------------
-# 2. Importar kallisto
+# 2. Figura 1: tamaño de las librerias
 # -------------------------
-# El transcriptoma del NCBI no trae un mapa transcrito -> gen,
-# asi que el analisis se hace a nivel de transcrito (txOut = TRUE).
-files <- file.path(KALLISTO_DIR, meta$sample_id, "abundance.tsv")
-names(files) <- meta$sample_id
-stopifnot(all(file.exists(files)))
-
-txi <- tximport(files, type = "kallisto", txOut = TRUE)
-saveRDS(txi, file.path(OUT_DIR, "txi.rds"))
+barplot(colSums(txi$counts) / 1e6, names.arg = meta$Sample,
+        col = colores[meta$condition], las = 1,
+        ylab = "Millones de lecturas", main = "Tamaño de las librerias")
 
 # -------------------------
 # 3. DESeq2
@@ -48,35 +50,45 @@ dds <- DESeqDataSetFromTximport(txi, colData = meta, design = ~ condition)
 
 # Filtro: al menos 10 cuentas en tantas muestras como el grupo mas pequeno
 keep <- rowSums(counts(dds) >= 10) >= min(table(meta$condition))
+table(keep)
 dds  <- dds[keep, ]
 
 dds <- DESeq(dds)
-saveRDS(dds, file.path(OUT_DIR, "dds.rds"))
-
-# Datos transformados para graficas
 vsd <- vst(dds, blind = FALSE)
-saveRDS(vsd, file.path(OUT_DIR, "vsd.rds"))
 
 # -------------------------
-# 4. Graficas de control de calidad
+# 4. Figura 2: antes y despues de la normalizacion
 # -------------------------
-# PCA
-p_pca <- plotPCA(vsd, intgroup = "condition") + theme_bw()
-ggsave(file.path(OUT_DIR, "PCA.pdf"), p_pca, width = 6, height = 5)
+# La linea punteada es la mediana de todas las muestras:
+# despues de normalizar, las medianas de cada muestra deben quedar alineadas con ella
+antes   <- log2(counts(dds) + 1)
+despues <- log2(counts(dds, normalized = TRUE) + 1)
 
-# Distancias entre muestras
-dist_mat <- as.matrix(dist(t(assay(vsd))))
-pheatmap(dist_mat, filename = file.path(OUT_DIR, "distancias_muestras.pdf"),
-         width = 6, height = 5)
+par(mfrow = c(1, 2))
+boxplot(antes, names = meta$Sample, col = colores[meta$condition],
+        las = 2, ylab = "log2(cuentas + 1)", main = "Antes")
+abline(h = median(antes), lty = 2, lwd = 2)
+boxplot(despues, names = meta$Sample, col = colores[meta$condition],
+        las = 2, ylab = "log2(cuentas + 1)", main = "Despues")
+abline(h = median(despues), lty = 2, lwd = 2)
+par(mfrow = c(1, 1))
 
 # -------------------------
-# 5. Resultados
+# 5. Figura 3: PCA
+# -------------------------
+plotPCA(vsd, intgroup = "condition") +
+  geom_text(aes(label = meta$Sample), vjust = -1, size = 3) +
+  scale_color_manual(values = colores) +
+  theme_bw()
+
+# -------------------------
+# 6. Resultados
 # -------------------------
 resultsNames(dds)
-coef <- resultsNames(dds)[2]          # p. ej. "condition_calor_vs_control"
+coef <- resultsNames(dds)[2]          # "condition_calor_vs_control"
 
-res <- lfcShrink(dds, coef = coef, type = "apeglm")
-saveRDS(res, file.path(OUT_DIR, "res.rds"))
+res <- results(dds, name = coef, alpha = PADJ)
+summary(res)
 
 res_df <- as.data.frame(res)
 res_df$transcrito <- rownames(res_df)
@@ -90,30 +102,24 @@ write.table(sig, file.path(OUT_DIR, "DE_significativos.tsv"),
 nrow(sig)
 
 # -------------------------
-# 6. Figuras de resultados
+# 7. Figura 4: heatmap de los 50 transcritos mas significativos
 # -------------------------
-# MA plot
-pdf(file.path(OUT_DIR, "MA_plot.pdf"), width = 6, height = 5)
-plotMA(res, ylim = c(-5, 5))
-dev.off()
+# res_df ya esta ordenado por padj; si hay pocos significativos, usa los 50 primeros
+top <- head(res_df$transcrito, 50)
+pheatmap(assay(vsd)[top, ], scale = "row", show_rownames = FALSE,
+         annotation_col = meta["condition"], labels_col = meta$Sample)
 
-# Volcano
+# -------------------------
+# 8. Figura 5: volcano plot
+# -------------------------
 res_df$grupo <- "NS"
 res_df$grupo[which(res_df$padj < PADJ & res_df$log2FoldChange >=  LFC)] <- "Up"
 res_df$grupo[which(res_df$padj < PADJ & res_df$log2FoldChange <= -LFC)] <- "Down"
+table(res_df$grupo)
 
-p_vol <- ggplot(na.omit(res_df), aes(log2FoldChange, -log10(padj), color = grupo)) +
+ggplot(subset(res_df, !is.na(padj)), aes(log2FoldChange, -log10(padj), color = grupo)) +
   geom_point(alpha = 0.6, size = 1) +
   scale_color_manual(values = c(Up = "firebrick", Down = "steelblue", NS = "grey70")) +
   geom_vline(xintercept = c(-LFC, LFC), linetype = "dashed") +
   geom_hline(yintercept = -log10(PADJ), linetype = "dashed") +
   theme_bw()
-ggsave(file.path(OUT_DIR, "volcano.pdf"), p_vol, width = 6, height = 5)
-
-# Heatmap de los 50 transcritos mas significativos
-top <- head(rownames(sig), 50)
-pheatmap(assay(vsd)[top, ], scale = "row", show_rownames = FALSE,
-         annotation_col = meta["condition"],
-         filename = file.path(OUT_DIR, "heatmap_top50.pdf"), width = 6, height = 7)
-
-message("Listo. Resultados en ", OUT_DIR, "/")

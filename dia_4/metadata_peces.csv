@@ -1,9 +1,9 @@
-﻿sample_id,condition
-SRR24971448,control
-SRR24971449,control
-SRR24971450,control
-SRR24971451,control
-SRR24971452,calor
-SRR24971453,calor
-SRR24971454,calor
-SRR24971455,calor
+﻿sample_id,Sample,condition,sex,Development stage,Age,Ecotype
+SRR24971455,1C,control,Male,Juvenile,12 months,Quintay
+SRR24971454,2C,control,Male,Juvenile,12 months,Quintay
+SRR24971453,3C,control,Male,Juvenile,12 months,Quintay
+SRR24971452,4C,control,Male,Juvenile,12 months,Quintay
+SRR24971451,5H,calor,Male,Juvenile,12 months,Quintay
+SRR24971450,6H,calor,Male,Juvenile,12 months,Quintay
+SRR24971449,7H,calor,Male,Juvenile,12 months,Quintay
+SRR24971448,8H,calor,Male,Juvenile,12 months,Quintay
