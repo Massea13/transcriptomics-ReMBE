@@ -7,4 +7,4 @@
 ./quality-assessment/logs/*
 ./resultados/*
 ./quality-assessment/.nextflow/
-
+./scripts/quality-assessment/
