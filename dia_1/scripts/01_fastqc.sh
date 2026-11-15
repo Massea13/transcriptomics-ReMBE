@@ -93,7 +93,7 @@ export NXF_LOG_FILE="${home}/${project}/logs/nextflow.log"
 
 srun nextflow run "${scripts}/01_main.nf" \
     -profile cluster \
-    --reads "${data}/RAW/*.fastq.gz" \
+    --reads "${data}/RAW/*_R{1,2}_001.fastq.gz" \
     --outdir "${home}/${project}/results" \
     --adapters "/home/idalia/miniconda3/envs/rembe_qc/share/trimmomatic-0.41-0/adapters/TruSeq3-PE-2.fa" \
     -with-report "${home}/${project}/logs/report.html" \

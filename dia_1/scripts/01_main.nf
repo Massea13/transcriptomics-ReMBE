@@ -10,7 +10,7 @@ params.adapters = null   // ruta al archivo de adaptadores, por ejemplo: /ruta/a
 // Canal: emparejar archivos R1/R2 por nombre de muestra
 //----------------------------------------
 Channel
-    .fromFilePairs(params.reads, size: 2)
+    .fromFilePairs(params.reads, size: 2, checkIfExists: true)
     .ifEmpty { error "No se encontraron pares FASTQ con el patrón: ${params.reads}" }
     .set { fastq_pairs }
 
