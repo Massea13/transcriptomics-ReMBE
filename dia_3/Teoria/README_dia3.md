@@ -13,8 +13,7 @@ c) Preparación y normalización para DEGs
 En el análisis de un **transcriptoma**, el alineamiento con referencia consiste en comparar las lecturas de ARN obtenidas por secuenciación con un **genoma de referencia** o con una colección de transcritos conocidos (**transcriptoma de referencia**).Así se estima de qué gen o transcrito proviene cada lectura y luego se pueden cuantificar los niveles de expresión. (Dobin, 2015) (Mekso, 2022).
  Una alineación o cuantificación inexacta puede generar falsos positivos o falsos negativos en los análisis posteriores, lo que conlleva conclusiones erróneas.
 
- Existen varios métodos para la alineación y cuantificación, como BWA, Salmon, Kallisto y STAR, desarrollados para abordar los desafíos que plantean los datos de secuenciación de alto rendimiento generados por la secuenciación masiva de ARN. Estos métodos emplean diferentes algoritmos para alinear y cuantificar las lecturas de RNA-seq. Cada uno presenta ventajas y limitaciones, dependiendo del diseño experimental y la calidad de los datos de RNA-seq analizados.
-
+Existen varios métodos para la alineación y cuantificación, como BWA, Salmon, Kallisto y STAR, desarrollados para abordar los desafíos que plantean los datos de secuenciación de alto rendimiento generados por la secuenciación masiva de ARN. Estos métodos emplean diferentes algoritmos para alinear y cuantificar las lecturas de RNA-seq. Cada uno presenta ventajas y limitaciones, dependiendo del diseño experimental y la calidad de los datos de RNA-seq analizados.
  
 Los ARN maduros suelen tener partes que corresponden a exones separados por intrones en el genoma. Por eso, al alinearlas contra el genoma, las herramientas deben permitir alineamientos “con saltos” entre exones y pueden ayudar a detectar empalmes o variantes de transcritos. (Trapnell, 2009) (Dobin, 2015)
 
@@ -28,11 +27,29 @@ A diferencia del ADN genómico, las lecturas de RNA-seq derivadas de ARNm maduro
 ### 1. Estrategias de Mapeo: Del Genoma al Transcriptoma de Referencia
 
 #### ¿Por qué no usamos STAR ni HISAT2 en esta práctica?
-> **💡 Pregunta detonadora:** *Si en la mayoría de los artículos de RNA-seq se utilizan STAR o HISAT2, ¿por qué en nuestro flujo de trabajo con oyamel (`Abies`) usamos BWA y Kallisto directamente contra un transcriptoma?*
+> **💡 Pregunta:** *Si en la mayoría de los artículos de RNA-seq se utilizan STAR o HISAT2, ¿por qué en nuestro flujo de trabajo con oyamel (`Abies`) usamos BWA y Kallisto directamente contra un transcriptoma?*
 
-Las herramientas como **STAR** y **HISAT2** son alineadores *splice-aware* (conscientes del empalme): necesitan el **genoma completo** (FASTA) y un archivo de coordenadas (GTF/GFF) para "partir" las lecturas a través de los bordes exón-intrón. Sin embargo, las coníferas poseen genomas gigantescos (~20 Gb, casi 7 veces el tamaño del genoma humano) y altamente repetitivos; alinear contra un genoma de ese tamaño demandaría nodos con más de 100 GB de RAM o simplemente no contamos con un ensamblaje cromosómico completo.
+> **💡 Respuesta:** *Las herramientas como **STAR** y **HISAT2** son alineadores *splice-aware* (conscientes del empalme): necesitan el **genoma completo** (FASTA) y un archivo de coordenadas (GTF/GFF) para "partir" las lecturas a través de los bordes exón-intrón. Sin embargo, las coníferas poseen genomas enormes (~20 Gb, casi 7 veces el tamaño del genoma humano) y altamente repetitivos; alinear contra un genoma de ese tamaño requiere más tiempo y capacidad informática.
 
-Al utilizar un **transcriptoma de referencia** (`GCAT_AB-RNA-1.0.16.fa`), las secuencias ya representan exclusivamente ARNm maduro (exones empalmados sin intrones), por lo que empleamos alineadores lineales rápidos (**BWA**) o pseudoalineadores (**Kallisto**).
+Al utilizar un **transcriptoma de referencia** (`GCAT_AB-RNA-1.0.16.fa`), las secuencias provienen de ARNm maduro (exones empalmados sin intrones), por lo que empleamos alineadores lineales rápidos (**BWA**) o pseudoalineadores (**Kallisto**).*
+
+
+# Alineamiento *splice-aware*
+
+En RNA-seq, una lectura puede abarcar dos exones que están separados por un intrón en el genoma. Un alineador *splice-aware* permite que la lectura se ajuste a dos segmentos del genoma y que el espacio entre ellos se interprete como un intrón, en vez de exigir que toda la lectura coincida de forma continua. (Musich, 2021)(Raplee, 2019)
+
+En términos generales, ambos programas buscan segmentos de la lectura que coincidan con el genoma y evalúan si pueden combinarse en un alineamiento que cruce una unión exón-exón; pueden usar anotaciones de empalme conocidas, aunque también buscan uniones nuevas. (Fenn, 2022)(Dobin, 2015)
+
+
+## Principios de funcionamiento
+
+* **HISAT2** usa índices FM basados en la transformación de Burrows–Wheeler. El diseño jerárquico de HISAT combina un índice del genoma completo, que ubica anclas de la lectura, con índices locales que ayudan a extender los alineamientos; HISAT2 también puede emplear un índice en forma de grafo que incorpora variantes genómicas. (Kim, 2015) (Kim, 2019)
+
+* **STAR** busca segmentos de lectura —*seeds*— en un índice de sufijos no comprimido, los agrupa y los “ensambla” para obtener alineamientos continuos o divididos por intrones. Su método permite identificar uniones de empalme, incluso algunas no anotadas previamente. (Dobin, 2013)
+
+
+**El alineamiento *splice-aware* ubica la lectura en el “mapa” del genoma, teniendo en cuenta los intrones; el pseudoalineamiento pregunta “¿con qué transcritos de referencia es compatible esta lectura?”. (Dobin, 2013) (Bray, 2016)**
+
 
 | Criterio | Alineadores *Splice-Aware* (STAR / HISAT2) | Alineamiento Lineal (BWA) | Pseudoalineamiento (Kallisto) |
 | :--- | :--- | :--- | :--- |
@@ -44,14 +61,15 @@ Al utilizar un **transcriptoma de referencia** (`GCAT_AB-RNA-1.0.16.fa`), las se
 
 ---
 
-#### Analogía 1: El Detective Forense (`BWA`) y su implementación en Bash
-**BWA (`bwa mem`)** actúa como un *detective forense*: busca coincidencia **letra por letra (base por base)** en todo el transcriptoma mediante un índice comprimido con la Transformada de Burrows-Wheeler (BWT) y un índice FM (*FM-index*). Entrega un expediente completo (`BAM`) con las coordenadas exactas de cada lectura, pero cuando dos isoformas comparten una secuencia idéntica, la lectura se marca como ambigua (`MAPQ = 0`).
+#### Supongamos unos escenarios
+
+**BWA (`bwa mem`)** es como un detective que busca coincidencias **letra por letra (base por base)** en todo el transcriptoma mediante un índice comprimido con la Transformada de Burrows-Wheeler (BWT) y un índice FM (*FM-index*). Cuando entrega su expediente completo (`archivo BAM`) incluye las coordenadas exactas de cada lectura, pero cuando dos isoformas con secuencias idénticas, marca a las lecturas como ambiguas (`MAPQ = 0`).
 
 ```bash
-# 1. Construcción del índice BWT (se ejecuta una sola vez sobre la referencia)
+# 1. Construir índice BWT (se ejecuta una sola vez sobre la referencia)
 bwa index /scratch/taller/datos_oyamel/REFERENCE/GCAT_AB-RNA-1.0.16.fa
 
-# 2. Alineamiento base por base + conversión a BAM ordenado + extracción de conteos
+# 2. Alinear base por base + convertir SAM a BAM + extraer conteos
 bwa mem -t 4 "$REF" "${TRIM_DIR}/${SAMPLE}_1P.fq.gz" "${TRIM_DIR}/${SAMPLE}_2P.fq.gz" | \
     samtools view -@ 4 -bS - | \
     samtools sort -@ 4 -o "${OUT_DIR}/${SAMPLE}.sorted.bam"
@@ -61,7 +79,7 @@ samtools idxstats "${OUT_DIR}/${SAMPLE}.sorted.bam" > "${OUT_DIR}/${SAMPLE}_coun
 
 ```
 
-Kallisto (kallisto quant) actúa como un bibliotecario de códigos postales: no alinea base por base ni genera archivos BAM. Fragmenta el transcriptoma en palabras cortas de 31 letras (k-mers) para construir un Grafo de Bruijn del Transcriptoma (T-DBG), agrupa las lecturas en clases de equivalencia (equivalence classes) según el subconjunto de isoformas compatibles con esos k-mers, y aplica el algoritmo estadístico Expectation-Maximization (EM) para estimar probabilísticamente la abundancia de cada transcrito.
+**Kallisto (kallisto quant)** es un detective que en lugar de ver letra por letra, opta por utilizar fragmentos para realizar su búsqueda. Puede utilizar palabras cortas de 31 letras (k-mers) para construir un Grafo de Bruijn del Transcriptoma (T-DBG). Después agrupa las lecturas en clases de equivalencia (equivalence classes) según el subconjunto de isoformas compatibles con esos k-mers, y aplica el algoritmo estadístico Expectation-Maximization (EM) para estimar probabilísticamente la abundancia de cada transcrito.
 
 ```bash
 # 1. Construcción del Grafo de Bruijn de k-mers (.idx)
@@ -76,130 +94,13 @@ kallisto quant \
     "${TRIM_DIR}/${SAMPLE}_2P.fq.gz"
 ```
 
-PREGUNTA: Si el objetivo de un proyecto no es medir niveles de expresión génica, sino detectar mutaciones puntuales (SNPs) en las regiones codificantes de árboles sanos vs. dañados, ¿qué herramienta es indispensable?
+> **💡 Pregunta:** Si el objetivo de un proyecto no es medir niveles de expresión génica, sino detectar mutaciones puntuales (SNPs) en las regiones codificantes de árboles sanos vs. dañados, ¿qué herramienta es indispensable?*
 
-Respuesta: BWA, ya que genera archivos posicionales .sorted.bam base por base necesarios para el llamado de variantes. Kallisto descarta la posición exacta de los nucleótidos.
+> **💡 Respuesta:** *BWA, ya que genera archivos posicionales .sorted.bam base por base necesarios para el llamado de variantes. Kallisto descarta la posición exacta de los nucleótidos.*
 
 
 ### 2. Unidades de Medida y Normalización Intra-muestra
 
-#### Analogía: La Competencia de Lectura de Libros
-
-Supongamos que evaluamos cuánto se leen dos libros en dos bibliotecas diferentes:
-* **Libro A (*El Quijote*):** 1,000 páginas vs. **Libro B (*El Principito*):** 100 páginas (**sesgo por longitud del transcrito**).
-* **Biblioteca 1:** 40 millones de lecturas vs. **Biblioteca 2:** 20 millones de lecturas (**sesgo por profundidad de secuenciación**).
-
-Los **conteos crudos** no corrigen ninguno de estos dos factores, por lo que no pueden compararse directamente entre genes distintos ni entre muestras distintas.
-
-| Métrica | ¿Corrige Profundidad? | ¿Corrige Longitud? | ¿Dónde se observa en nuestros outputs? | Uso recomendado |
-| :--- | :---: | :---: | :--- | :--- |
-| **Conteos Crudos** (*Raw / Est. Counts*) | ❌ No | ❌ No | Columna 3 de `*_counts.txt` (BWA) y `est_counts` de `abundance.tsv` (Kallisto) | Insumo obligatorio para modelos estadísticos de DEGs (`DESeq2`, `edgeR`). |
-| **CPM** (*Counts Per Million*) | ✅ Sí | ❌ No | Calculado en R (`edgeR::cpm()`) | Filtrar baja expresión; comparar un **mismo transcrito** entre muestras. |
-| **RPKM / FPKM** | ✅ Sí | ✅ Sí | Métrica clásica (Cufflinks/RSEM) | Comparaciones históricas dentro de una misma muestra (la suma total varía entre muestras). |
-| **TPM** (*Transcripts Per Million*) | ✅ Sí | ✅ Sí | Columna `tpm` de `abundance.tsv` (Kallisto) | Visualización exploratoria (*heatmaps*) y comparación de proporciones entre muestras (siempre suma `1,000,000`). |
-
-#### Fórmulas de referencia
-
-* **CPM:**
-  $$\text{CPM}_i = \frac{C_i}{\sum_{j} C_j} \times 10^6$$
-* **FPKM:**
-  $$\text{FPKM}_i = \frac{F_i}{\left(\frac{L_i}{10^3}\right) \times \left(\frac{\sum_{j} F_j}{10^6}\right)}$$
-* **TPM:**
-  $$\text{TPM}_i = \frac{C_i / L_i}{\sum_{j} (C_j / L_j)} \times 10^6$$
-  
-
-### 3. Preparación de Datos para Expresión Diferencial (DEGs) en R/Bioconductor
-
-#### El sesgo de composición de la librería (¿Por qué NO usar TPM para calcular DEGs?)
-
-> **💡 Escenario de discusión:** *En un árbol sano (`DPVR1`) tenemos 4 genes con 250,000 TPM cada uno (suma = 1,000,000). En un árbol dañado por ozono (`DPVR6`), los primeros 3 genes NO cambian su expresión biológica real, pero el Gen 4 (respuesta antioxidante) se sobreexpresa masivamente y acapara el 70% de toda la secuenciación. ¿Qué ocurre con los TPM de los genes 1, 2 y 3?*
-
-Debido a que los TPM están restringidos a sumar exactamente un millón, **los genes 1, 2 y 3 caerán artificialmente de 250,000 a 100,000 TPM cada uno**. Si se aplicaran pruebas estadísticas sobre TPM, parecería que dichos genes se reprimieron cuando en realidad permanecieron constantes.
-
-#### Flujo de preparación en R (`edgeR` / `DESeq2`)
-
-1. **Importación de conteos y metadatos:**
-   * **Desde BWA:** Se unifica la columna 3 de los archivos `*_counts.txt` en una matriz de enteros ($G \text{ transcritos} \times N \text{ muestras}$).
-   * **Desde Kallisto:** Se utiliza el paquete `tximport` para importar los archivos `abundance.tsv`, conservando los conteos estimados (`est_counts`) y las longitudes efectivas promedio (`eff_length`) como compensación (*offset*) estadística, **sin redondear valores TPM**.
-2. **Filtrado de genes con baja expresión:**
-   * Se retienen únicamente los transcritos con al menos **1 CPM** en un mínimo de $k$ muestras, donde $k$ corresponde al tamaño del grupo experimental más pequeño (ej. $k = 3$ para contrastar 3 muestras sanas `DPVR1, 3, 4` vs. 3 dañadas `DPVR6, 8, 9`). Esto reduce el ruido y evita penalizaciones excesivas en la corrección por pruebas múltiples (FDR).
-3. **Normalización entre muestras:**
-   * **TMM (*Trimmed Mean of M-values* en `edgeR`):** Funciona como un *jurado olímpico*; ordena los genes según su cambio relativo ($\log_2$ fold-change o valor $M$), recorta el 30% superior y el 30% inferior (los genes extremos que responden al tratamiento) y promedia el 40% central para estimar el factor de normalización real de cada librería.
-   * **Mediana de Razones (*Median of Ratios* en `DESeq2`):** Construye una pseudo-referencia (media geométrica de cada gen entre todas las muestras), divide cada muestra entre esa referencia y toma la **mediana** como factor de tamaño (*size factor*), evitando que unos pocos genes hiper-expresados distorsionen la escala.
-
----
-
-## 📚 Referencias
-
-* Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2016). Near-optimal probabilistic RNA-seq quantification. *Nature Biotechnology*, 34(5), 525–527. https://doi.org/10.1038/nbt.3519
-* Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. *Bioinformatics*, 25(14), 1754–1760. https://doi.org/10.1093/bioinformatics/btp324
-* Love, M. I., Huber, W., & Anders, S. (2014). Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. *Genome Biology*, 15(12), 550. https://doi.org/10.1186/s13059-014-0550-8
-* Robinson, M. D., & Oshlack, A. (2010). A scaling normalization method for differential expression analysis of RNA-seq data. *Genome Biology*, 11(3), R25. https://doi.org/10.1186/gb-2010-11-3-r25
-* Soneson, C., Love, M. I., & Robinson, M. D. (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. *F1
-
-
-#### Fundamentos Algorítmicos
-
-- **STAR (Spliced Transcripts Alignment to a Reference):** Utiliza un algoritmo de búsqueda secuencial de semillas sin comprimir sobre arreglos de sufijos (*Uncompressed Suffix Arrays*). Identifica la coincidencia máxima exacta (MMP - *Maximum Mapped Prefix*) y cose las semillas divididas por intrones.
-- **HISAT2 (Hierarchical Indexing for Spliced Alignment of Transcripts):** Basado en la Transformada de Burrows-Wheeler (BWT) y el FM-Index. Emplea dos tipos de índices: un índice global para todo el genoma y miles de pequeños índices locales que cubren regiones genómicas de ~$64,000$ pb, permitiendo una asignación rápida de exones disjuntos con un requerimiento de memoria reducido.
-
-#### Comparativa: HISAT2 vs. STAR vs. Pseudoalineadores (Salmon/Kallisto)
-
-| Característica | HISAT2 | STAR | Salmon / Kallisto |
-| :--- | :--- | :--- | :--- |
-| **Algoritmo principal** | Hierarchical BWT / GFM-Index | Sequential Seed Search + Suffix Array | Grafos de de Bruijn / Quasi-mapping |
-| **Uso de Memoria (RAM)** | **Bajo (~4–8 GB)** | **Alto (~30–32 GB)** | **Muy Bajo (~2–4 GB)** |
-| **Velocidad** | Moderada - Alta | **Extremadamente rápido** | **Ultra-rápido (Segundos/Muestra)** |
-| **Sensibilidad en *splicing*** | Buena | Excelente (uniones *de novo*) | No aplica (cuantifica transcriptoma) |
-| **Output primario** | Archivo BAM genómico | Archivo BAM genómico | Matrices de abundancia (Isoformas/Genes) |
-| **Escenario ideal** | Equipos con recursos limitados o datasets masivos | Clusters HPC; detección de variantes/splicing *de novo* | Estimación rápida de expresión diferencial génica/de transcritos |
-
-
-# Alineamiento *splice-aware*
-
-En RNA-seq, una lectura puede abarcar dos exones que están separados por un intrón en el genoma. Un alineador *splice-aware* permite que la lectura se ajuste a dos segmentos del genoma y que el espacio entre ellos se interprete como un intrón, en vez de exigir que toda la lectura coincida de forma continua. (Musich, 2021)(p6) (Raplee, 2019)(p3)
-
-En términos generales, ambos programas buscan segmentos de la lectura que coincidan con el genoma y evalúan si pueden combinarse en un alineamiento que cruce una unión exón-exón; pueden usar anotaciones de empalme conocidas, aunque también buscan uniones nuevas. (Fenn, 2022)(p3) (Dobin, 2015)
-
-
-## Principios de funcionamiento
-
-* **HISAT2** usa índices FM basados en la transformación de Burrows–Wheeler. El diseño jerárquico de HISAT combina un índice del genoma completo, que ubica anclas de la lectura, con índices locales que ayudan a extender los alineamientos; HISAT2 también puede emplear un índice en forma de grafo que incorpora variantes genómicas. (Kim, 2015) (Kim, 2019)
-
-* **STAR** busca segmentos de lectura —*seeds*— en un índice de sufijos no comprimido, los agrupa y los “ensambla” para obtener alineamientos continuos o divididos por intrones. Su método permite identificar uniones de empalme, incluso algunas no anotadas previamente. (Dobin, 2013)
-
-
-## Ventajas y desventajas
-
-| Herramienta | Ventajas                                                                                                                                                                                                                           | Desventajas o cautelas                                                                                                                                                                                                                 |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **HISAT2**  | Su diseño está orientado a reducir el uso de memoria; el trabajo original sobre HISAT reportó 4,3 GB para el genoma humano, aunque esa cifra corresponde a HISAT y no debe tomarse como requisito universal de HISAT2. (Kim, 2015) | En una comparación de RNA-seq de muestras FFPE de cáncer de mama, HISAT2 alineó más lecturas a pseudogenes que STAR; el resultado dependió del tipo de muestra y no demuestra que ocurra en todos los experimentos. (Raplee, 2019)(p7) |
-| **STAR**    | Se diseñó para alta velocidad y sensibilidad; además de uniones de empalme, puede detectar alineamientos quiméricos —por ejemplo, posibles fusiones— y secuencias de ARN de mayor longitud. (Dobin, 2013) (Dobin, 2015)            | Usa un índice de sufijos no comprimido; los índices de este tipo pueden requerir bastante memoria, lo que puede ser una limitación según el tamaño del genoma y los recursos disponibles. (Musich, 2021)(p2) (p3)                      |
-
-En una evaluación comparativa de herramientas para análisis de empalme alternativo, STAR e HISAT2 ofrecieron un buen equilibrio entre precisión, lecturas no alineadas y tiempo de ejecución; por tanto, no hay un ganador universal para todos los datos y objetivos. (Fenn, 2022)(p3) (p5)
-
-Ambos pueden producir alineamientos de empalme falsos en regiones repetidas del genoma, así que detectar una unión nueva no basta por sí solo para concluir que existe un transcrito real. (Shinder, 2023)(p1) (p2)
-
-**Orientación práctica:** HISAT2 puede ser conveniente cuando importa limitar el uso de memoria; STAR puede ser atractivo cuando se priorizan la velocidad y la detección de uniones nuevas o alineamientos más complejos. Conviene considerar el análisis posterior y que el rendimiento puede variar según la composición del genoma. (Musich, 2021)(p7) 
-
-
-
-#Pseudoalineamiento    
-
-
-
-
-
-
-|                           | Alineamiento *splice-aware*                                                                                                                                                                     | Pseudoalineamiento                                                                                                  |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Qué hace**              | Alinea las lecturas contra el **genoma**, permitiendo que una lectura cruce un intrón y conecte segmentos de exones. (Dobin, 2013)                                                              | No alinea cada base: identifica el conjunto de transcritos de referencia compatibles con cada lectura. (Bray, 2016) |
-| **Qué produce**           | Posiciones genómicas detalladas para las lecturas, incluidos los tramos alineados a cada lado de una unión de empalme. (Dobin, 2013)                                                            | Grupos de transcritos compatibles. (Bray, 2016)                                                                     |
-| **Para qué resulta útil** | Cuando interesa estudiar uniones de empalme, buscar empalmes nuevos o conservar la ubicación de las lecturas en el genoma. STAR, por ejemplo, puede detectar uniones no anotadas. (Dobin, 2013) | Cuando se busca evitar el alineamiento base por base y reducir un cuello de botella computacional. (Bray, 2016)     |
-
-**En términos sencillos:** el alineamiento *splice-aware* ubica la lectura en el “mapa” del genoma, teniendo en cuenta los intrones; el pseudoalineamiento pregunta “¿con qué transcritos de referencia es compatible esta lectura?”. (Dobin, 2013) (Bray, 2016)
-
-**Limitación importante:** el pseudoalineamiento compara las lecturas con una referencia de transcritos. (Bray, 2016) STAR, en cambio, puede descubrir empalmes no canónicos. (Dobin, 2013) 
 
 
 # **Importancia de la normalización por la longitud del transcrito y la profundidad de secuenciación.**
@@ -315,79 +216,54 @@ Las longitudes utilizadas por los programas no siempre son simplemente la longit
 * Ninguna de estas unidades corrige automáticamente todos los sesgos técnicos, como los relacionados con composición de secuencia, protocolo o cambios específicos de longitud entre muestras. (Zheng, 2011)(p2) (Mandelboum, 2019)(p2)
 
 
-# Preparación de matrices para análisis de Expresión Diferencial (DEGs).
+Supongamos que evaluamos cuánto se leen dos libros en dos bibliotecas diferentes:
+* **Libro A (*El Quijote*):** 1,000 páginas vs. **Libro B (*El Principito*):** 100 páginas (**sesgo por longitud del transcrito**).
+* **Biblioteca 1:** 40 millones de lecturas vs. **Biblioteca 2:** 20 millones de lecturas (**sesgo por profundidad de secuenciación**).
+
+Los **conteos crudos** no corrigen ninguno de estos dos factores, por lo que no pueden compararse directamente entre genes distintos ni entre muestras distintas.
+
+| Métrica | ¿Corrige Profundidad? | ¿Corrige Longitud? | ¿Dónde se observa en nuestros outputs? | Uso recomendado |
+| :--- | :---: | :---: | :--- | :--- |
+| **Conteos Crudos** (*Raw / Est. Counts*) | No | No | Columna 3 de `*_counts.txt` (BWA) y `est_counts` de `abundance.tsv` (Kallisto) | Insumo obligatorio para modelos estadísticos de DEGs (`DESeq2`, `edgeR`). |
+| **CPM** (*Counts Per Million*) | Sí | No | Calculado en R (`edgeR::cpm()`) | Filtrar baja expresión; comparar un **mismo transcrito** entre muestras. |
+| **RPKM / FPKM** | Sí | Sí | Métrica clásica (Cufflinks/RSEM) | Comparaciones históricas dentro de una misma muestra (la suma total varía entre muestras). |
+| **TPM** (*Transcripts Per Million*) | Sí | Sí | Columna `tpm` de `abundance.tsv` (Kallisto) | Visualización exploratoria (*heatmaps*) y comparación de proporciones entre muestras (siempre suma `1,000,000`). |
+
+#### Fórmulas de referencia
+
+* **CPM (*Counts Per Million*):**
+
+$$\text{CPM}_i = \frac{C_i}{\sum_{j} C_j} \times 10^6$$
+
+* **FPKM (*Fragments Per Kilobase Million*):**
+
+$$\text{FPKM}_i = \frac{F_i}{\left(\frac{L_i}{10^3}\right) \times \left(\frac{\sum_{j} F_j}{10^6}\right)}$$
+
+* **TPM (*Transcripts Per Million*):**
+
+$$\text{TPM}_i = \frac{C_i / L_i}{\sum_{j} (C_j / L_j)} \times 10^6$$
 
 
-# Sesión 3: Construcción de Índices y Cuantificación con Transcriptoma de Referencia (4 horas)
+### 3. Preparación de Datos para Expresión Diferencial (DEGs) en R/Bioconductor
 
-**Objetivo:** Construir los índices necesarios y ejecutar los flujos de cuantificación de lecturas (alineamiento tradicional con BWA y pseudoalineamiento con Kallisto) utilizando un transcriptoma de referencia en un entorno HPC mediante Bash/SLURM, comprendiendo las bases estadísticas y algorítmicas para preparar matrices de expresión diferencial en R/Bioconductor.
+#### El sesgo de composición de la librería (¿Por qué NO usar TPM para calcular DEGs?)
 
----
+> **💡 Pregunta:** *En un árbol sano (`DPVR1`) tenemos 4 genes con 250,000 TPM cada uno (suma = 1,000,000). En un árbol dañado por ozono (`DPVR6`), los primeros 3 genes NO cambian su expresión biológica real, pero el Gen 4 (respuesta antioxidante) se sobreexpresa masivamente y acapara el 70% de toda la secuenciación. ¿Qué ocurre con los TPM de los genes 1, 2 y 3?*
 
-## 📋 Estructura de la Sesión
+> **💡 Pregunta:** *Debido a que los TPM están restringidos a sumar exactamente un millón, **los genes 1, 2 y 3 caerán artificialmente de 250,000 a 100,000 TPM cada uno**. Si se aplicaran pruebas estadísticas sobre TPM, parecería que dichos genes se reprimieron cuando en realidad permanecieron constantes.*
 
-* **Teoría (1 hora):**
-  * Paradigmas de mapeo: Alineadores *splice-aware* (STAR/HISAT2) vs. mapeo directo a transcriptoma de referencia (BWA y Kallisto).
-  * Unidades de medida y normalización intra-muestra: Conteos crudos (*Raw Counts*), CPM, RPKM, FPKM y TPM.
-  * Preparación de datos para expresión diferencial (DEGs) en R/Bioconductor: Importación (`tximport`), filtrado por baja expresión y normalización entre muestras (TMM en `edgeR` vs. Mediana de Razones en `DESeq2`).
-* **Práctica en HPC con Bash / SLURM (3 horas):**
-  1. Construcción de índices del transcriptoma de referencia (`GCAT_AB-RNA-1.0.16.fa`) para **BWA** y **Kallisto**.
-  2. Cuantificación por alineamiento tradicional con **BWA** (`bwa mem`) y procesamiento con **Samtools** (`view`, `sort`, `index`, `idxstats`).
-  3. Cuantificación por pseudoalineamiento probabilístico con **Kallisto** (`kallisto quant`).
-  4. Comparación de matrices obtenidas y discusión sobre estrategias de anotación funcional de transcriptomas.
+#### Flujo de preparación en R (`edgeR` / `DESeq2`)
 
----
-
-## 📖 Desarrollo Teórico
-
-### 1. Estrategias de Mapeo: Del Genoma al Transcriptoma de Referencia
-
-#### ¿Por qué no usamos STAR ni HISAT2 en esta práctica?
-> **💡 Pregunta detonadora:** *Si en la mayoría de los artículos de RNA-seq se utilizan STAR o HISAT2, ¿por qué en nuestro flujo de trabajo con oyamel (`Abies`) usamos BWA y Kallisto directamente contra un transcriptoma?*
-
-Las herramientas como **STAR** y **HISAT2** son alineadores *splice-aware* (conscientes del empalme): necesitan el **genoma completo** (FASTA) y un archivo de coordenadas (GTF/GFF) para "partir" las lecturas a través de los bordes exón-intrón. Sin embargo, las coníferas poseen genomas gigantescos (~20 Gb, casi 7 veces el tamaño del genoma humano) y altamente repetitivos; alinear contra un genoma de ese tamaño demandaría nodos con más de 100 GB de RAM o simplemente no contamos con un ensamblaje cromosómico completo.
-
-Al utilizar un **transcriptoma de referencia** (`GCAT_AB-RNA-1.0.16.fa`), las secuencias ya representan exclusivamente ARNm maduro (exones empalmados sin intrones), por lo que empleamos alineadores lineales rápidos (**BWA**) o pseudoalineadores (**Kallisto**).
-
-| Criterio | Alineadores *Splice-Aware* (STAR / HISAT2) | Alineamiento Lineal (BWA) | Pseudoalineamiento (Kallisto) |
-| :--- | :--- | :--- | :--- |
-| **Referencia requerida** | Genoma completo (FASTA) + Anotación (GTF/GFF) | Transcriptoma (`GCAT_AB-RNA-1.0.16.fa`) | Transcriptoma (`GCAT_AB-RNA-1.0.16.fa`) |
-| **¿Resuelve intrones?** | Sí, parte las lecturas en bordes exón-intrón | No (asume secuencias continuas sin intrones) | No (asume secuencias continuas sin intrones) |
-| **Consumo de RAM en HPC** | Muy alto (30–100+ GB según el genoma) | Bajo (`8G` en SLURM) | Muy bajo (`8G` en SLURM) |
-| **Velocidad de ejecución** | Rápida (si hay suficiente RAM) | Moderada (minutos a horas por muestra) | Extremadamente rápida (segundos a minutos) |
-| **Salida principal** | Archivo de alineamiento (`SAM`/`BAM`) | Archivo de alineamiento (`SAM`/`BAM`) | Tabla de abundancias (`abundance.tsv`) |
-
----
-
-#### Analogía 1: El Detective Forense (`BWA`) y su implementación en Bash
-**BWA (`bwa mem`)** actúa como un *detective forense*: busca coincidencia **letra por letra (base por base)** en todo el transcriptoma mediante un índice comprimido con la Transformada de Burrows-Wheeler (BWT) y un índice FM (*FM-index*). Entrega un expediente completo (`BAM`) con las coordenadas exactas de cada lectura, pero cuando dos isoformas comparten una secuencia idéntica, la lectura se marca como ambigua (`MAPQ = 0`).
-
-```bash
-# 1. Construcción del índice BWT (se ejecuta una sola vez sobre la referencia)
-bwa index /scratch/taller/datos_oyamel/REFERENCE/GCAT_AB-RNA-1.0.16.fa
-
-# 2. Alineamiento base por base + conversión a BAM ordenado + extracción de conteos
-bwa mem -t 4 "$REF" "${TRIM_DIR}/${SAMPLE}_1P.fq.gz" "${TRIM_DIR}/${SAMPLE}_2P.fq.gz" | \
-    samtools view -@ 4 -bS - | \
-    samtools sort -@ 4 -o "${OUT_DIR}/${SAMPLE}.sorted.bam"
-
-samtools index "${OUT_DIR}/${SAMPLE}.sorted.bam"
-samtools idxstats "${OUT_DIR}/${SAMPLE}.sorted.bam" > "${OUT_DIR}/${SAMPLE}_counts.txt"
-# **Práctica en HPC con Nextflow (3 horas)**
-
-Construcción de índices
-
-Alineamiento vs. pseudoalineamiento
-
-Obtención de matrices de conteo
-
-Comparación de estrategias de anotación
+1. **Importar conteos y metadatos:**
+   * **Desde BWA:** Se unifica la columna 3 de los archivos `*_counts.txt` en una matriz de enteros ($G \text{ transcritos} \times N \text{ muestras}$).
+   * **Desde Kallisto:** Se utiliza el paquete `tximport` para importar los archivos `abundance.tsv`, conservando los conteos estimados (`est_counts`) y las longitudes efectivas promedio (`eff_length`) como compensación (*offset*) estadística, **sin redondear valores TPM**.
+2. **Filtrado de genes con baja expresión:**
+   * Se retienen únicamente los transcritos con al menos **1 CPM** en un mínimo de $k$ muestras, donde $k$ corresponde al tamaño del grupo experimental más pequeño (ej. $k = 3$ para contrastar 3 muestras sanas `DPVR1, 3, 4` vs. 3 dañadas `DPVR6, 8, 9`). Esto reduce el ruido y evita penalizaciones excesivas en la corrección por pruebas múltiples (FDR).
+3. **Normalización entre muestras:**
+   * **TMM (*Trimmed Mean of M-values* en `edgeR`):** Ordena los genes según su cambio relativo ($\log_2$ fold-change o valor $M$), recorta el 30% superior y el 30% inferior (los genes extremos que responden al tratamiento) y promedia el 40% central para estimar el factor de normalización real de cada librería.
+   * **Mediana de Razones (*Median of Ratios* en `DESeq2`):** Construye una pseudo-referencia (media geométrica de cada gen entre todas las muestras), divide cada muestra entre esa referencia y toma la **mediana** como factor de tamaño (*size factor*), evitando que unos pocos genes hiper-expresados distorsionen la escala.
 
 
-# **Preparación de Datos para DEGs en R/Bioconductor**
-
-Preparación de datos para DEGs en R/Bioconductor:
-           Importación de matrices de conteos y metadatos.
 
 Para un análisis de expresión diferencial a nivel de gen, la matriz debe contener **conteos crudos**: genes en filas, muestras en columnas y números de lecturas o fragmentos asignados a cada gen. No se deben introducir TPM, FPKM, CPM ni conteos previamente normalizados en el análisis de DESeq2. (Love, 2015)(p3)
 
@@ -626,7 +502,13 @@ En experimentos con cambios globales grandes de ARN, TMM y otros métodos de esc
 
 ---
 
-### 📖 Referencias Bibliográficas
+## Referencias
+
+* Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2016). Near-optimal probabilistic RNA-seq quantification. *Nature Biotechnology*, 34(5), 525–527. https://doi.org/10.1038/nbt.3519
+* Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. *Bioinformatics*, 25(14), 1754–1760. https://doi.org/10.1093/bioinformatics/btp324
+* Love, M. I., Huber, W., & Anders, S. (2014). Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. *Genome Biology*, 15(12), 550. https://doi.org/10.1186/s13059-014-0550-8
+* Robinson, M. D., & Oshlack, A. (2010). A scaling normalization method for differential expression analysis of RNA-seq data. *Genome Biology*, 11(3), R25. https://doi.org/10.1186/gb-2010-11-3-r25
+* Soneson, C., Love, M. I., & Robinson, M. D. (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. *F1
 
 1. **Anders, S., & Huber, W.** (2010). Differential expression analysis for sequence count data. *Genome Biology*, 11(10), R106.
 2. **Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L.** (2016). Near-optimal probabilistic RNA-seq quantification. *Nature Biotechnology*, 34(5), 525–527.
@@ -639,33 +521,4 @@ En experimentos con cambios globales grandes de ARN, TMM y otros métodos de esc
 9. **Soneson, C., Love, M. I., & Robinson, M. D.** (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. *F1000Research*, 4, 1521.
 10. **Trapnell, C., Pachter, L., & Salzberg, S. L.** (2009). TopHat: discovering splice junctions with RNA-Seq. *Bioinformatics*, 25(9), 1105–1111.
 11. **Wagner, G. P., Kin, K., & Lynch, V. J.** (2012). Measurement of mRNA abundance using RNA-seq data: RPKM measure is inconsistent among samples. *Theory in Biosciences*, 131(4), 281–285.
-
-
-Usuarios Mac 
-
-
-En Mac podemos encontrar la consola en el icono llamado "Terminal" que ya está instalado en la computadora. Puedes encontrarla en tu Dock (barra de herramientas que aparece en algún costado de la pantalla de tu computadora). 
-
-**Figura_1MAC.png**
-
-También puedes encontrarlo si das click en el Launchpad -> Otras -> Terminal.
-
-**Figura_2MAC.png**
-**Figura_3MAC.png**
-**Figura_4MAC.png**
-
-Para abrir la consola basta con que le des doble click a icono "Terminal" y te aparecerá algo similar a la siguiente imagen:
-
-**Figura_5MAC.png**
-
-Una vez abierta la "Terminal" deberas ingresar al cluster con tu usuario y contraseña:
-
-**Figura_6MAC.png**
-**Figura_7MAC.png**
-
-Al ingresar al cluster recibirás la bienvenida, un breve manual que podrás explorar con el comando "more" y estarás list@ para utilizar el cluster durante el taller.
-
-**Figura_8MAC.png**
-
-
 
