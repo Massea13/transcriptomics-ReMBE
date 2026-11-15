@@ -51,7 +51,7 @@ if ! conda env list | grep -qE "^rembe_qc\s"; then
     conda create -y -n rembe_qc -c bioconda -c conda-forge fastqc multiqc
 else
     echo "[INFO] El ambiente 'rembe_qc' ya existe. Verificando paquetes ..."
-    conda install -y -n rembe_qc -c bioconda -c conda-forge fastqc multiqc
+    conda install -y -n rembe_qc -c bioconda -c conda-forge fastqc multiqc trimmomatic
 fi
 
 conda activate rembe_qc
@@ -59,13 +59,14 @@ conda activate rembe_qc
 # Verificación rápida
 fastqc --version
 multiqc --version
+trimmomatic -version
 
 #----------------------------------------
 # 4. Organización del proyecto
 #----------------------------------------
 project="quality-assessment"
 home="/home/idalia/transcriptomics-ReMBE/dia_1"
-data="/home/idalia/rembe_common/data"
+data="/scratch/taller/datos_oyamel"
 scripts="/home/idalia/transcriptomics-ReMBE/dia_1/scripts"
 
 # Crear estructura de trabajo si no existe
@@ -92,16 +93,13 @@ export NXF_LOG_FILE="${home}/${project}/logs/nextflow.log"
 
 srun nextflow run "${scripts}/01_main.nf" \
     -profile cluster \
-    --reads  "${data}/fastq/*.fastq.gz" \
+    --reads "${data}/RAW/*_R{1,2}_001.fastq.gz" \
     --outdir "${home}/${project}/results" \
+    --adapters "/home/idalia/miniconda3/envs/rembe_qc/share/trimmomatic-0.41-0/adapters/TruSeq3-PE-2.fa" \
     -with-report "${home}/${project}/logs/report.html" \
     -with-trace  "${home}/${project}/logs/trace.txt" \
     -with-timeline "${home}/${project}/logs/timeline.html" \
     -resume
-
-echo "[INFO] Quality assessment completado."
-
-
 
 
 #Remover  todos los módulos cargados

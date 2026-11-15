@@ -1,66 +1,34 @@
 #!/usr/bin/env nextflow
 
-/*
- * Quality assessment de transcriptomas:
- *   raw FASTQ  ->  FastQC  ->  MultiQC
- */
-
 nextflow.enable.dsl=2
 
-//----------------------------------------
-// Parámetros
-//----------------------------------------
-params.reads    = null          // p.ej. "/path/data/*.fastq.gz"
+params.reads    = null
 params.outdir   = "results"
-params.threads  = 4
+params.adapters = null   // ruta al archivo de adaptadores, por ejemplo: /ruta/adapters.fa
 
 //----------------------------------------
-// Perfiles: conda (local) y cluster (SLURM)
-//----------------------------------------
-profiles {
-    conda {
-        conda.enabled = true
-    }
-    cluster {
-        process.executor = 'slurm'
-        process.queue    = 'short'
-        process.cpus     = 2
-        process.memory   = '4 GB'
-        process.time     = '1h'
-        conda.enabled    = true
-    }
-    local {
-        process.executor = 'local'
-        conda.enabled    = false
-    }
-}
-
-//----------------------------------------
-// Canales
+// Canal: emparejar archivos R1/R2 por nombre de muestra
 //----------------------------------------
 Channel
-    .fromPath(params.reads)
-    .ifEmpty { error "No se encontraron FASTQ con el patrón: ${params.reads}" }
-    .map { file -> tuple(file.baseName.replaceAll(/_R?[12](_001)?$/, ''), file) }
-    .groupTuple()
+    .fromFilePairs(params.reads, size: 2, checkIfExists: true)
+    .ifEmpty { error "No se encontraron pares FASTQ con el patrón: ${params.reads}" }
     .set { fastq_pairs }
 
-//----------------------------------------
-// Proceso 1: FastQC
-//----------------------------------------
-process FASTQC {
+fastq_pairs.view()   // depuración temporal
 
+//----------------------------------------
+// Proceso 1: FastQC (control de calidad previo al recorte)
+//----------------------------------------
+process FASTQC_RAW {
     tag "${sample}"
-    publishDir "${params.outdir}/fastqc", mode: 'copy'
-
+    publishDir "${params.outdir}/fastqc_raw", mode: 'copy'
     conda 'bioconda::fastqc=0.12.1'
 
     input:
     tuple val(sample), path(fastqs)
 
     output:
-    path "*.zip"  , emit: zip
-    path "*.html" , emit: html
+    path "*.zip", emit: zip
 
     script:
     """
@@ -69,26 +37,72 @@ process FASTQC {
 }
 
 //----------------------------------------
-// Proceso 2: MultiQC
+// Proceso 2: Trimmomatic (recorte)
 //----------------------------------------
-process MULTIQC {
-
-    tag "all_samples"
-    publishDir "${params.outdir}/multiqc", mode: 'copy'
-
-    conda 'bioconda::multiqc=1.21'
+process TRIM {
+    tag "${sample}"
+    publishDir "${params.outdir}/trimmed", mode: 'copy'
+    conda 'bioconda::trimmomatic=0.39'
 
     input:
-    path '*',  stageAs: 'fastqc_reports/*'
-    path '*.zip'
+    tuple val(sample), path(reads)
+    path adapters
 
     output:
-    path "multiqc_report.html", emit: html
-    path "multiqc_data"       , emit: data
+    tuple val(sample), path("${sample}_R1_paired.fastq.gz"), path("${sample}_R2_paired.fastq.gz"), emit: paired
+    path "${sample}_R*_unpaired.fastq.gz", emit: unpaired
 
     script:
     """
-    multiqc fastqc_reports -o .
+    trimmomatic PE -threads ${task.cpus} -phred33 \\
+        ${reads[0]} ${reads[1]} \\
+        ${sample}_R1_paired.fastq.gz ${sample}_R1_unpaired.fastq.gz \\
+        ${sample}_R2_paired.fastq.gz ${sample}_R2_unpaired.fastq.gz \\
+        ILLUMINACLIP:${adapters}:2:30:10 \\
+        SLIDINGWINDOW:4:20 \\
+        MINLEN:36
+    """
+}
+
+//----------------------------------------
+// Proceso 3: FastQC (control de calidad posterior al recorte)
+//----------------------------------------
+process FASTQC_TRIMMED {
+    tag "${sample}"
+    publishDir "${params.outdir}/fastqc_trimmed", mode: 'copy'
+    conda 'bioconda::fastqc=0.12.1'
+
+    input:
+    tuple val(sample), path(r1), path(r2)
+
+    output:
+    path "*.zip", emit: zip
+
+    script:
+    """
+    fastqc --threads ${task.cpus} --outdir . ${r1} ${r2}
+    """
+}
+
+//----------------------------------------
+// Proceso 4: MultiQC (resumen final, incluye QC previo y posterior)
+//----------------------------------------
+process MULTIQC {
+    tag "all_samples"
+    publishDir "${params.outdir}/multiqc", mode: 'copy'
+    conda 'bioconda::multiqc=1.21'
+
+    input:
+    path raw_zips
+    path trim_zips
+
+    output:
+    path "multiqc_report.html", emit: html
+    path "multiqc_data", emit: data
+
+    script:
+    """
+    multiqc . -o .
     """
 }
 
@@ -96,11 +110,21 @@ process MULTIQC {
 // Workflow principal
 //----------------------------------------
 workflow {
+    // Canal del archivo de adaptadores
+    adapters_ch = Channel.fromPath(params.adapters, checkIfExists: true)
 
-    FASTQC(fastq_pairs)
+    // QC previo
+    FASTQC_RAW(fastq_pairs)
 
+    // Recorte
+    TRIM(fastq_pairs, adapters_ch)
+
+    // QC posterior
+    FASTQC_TRIMMED(TRIM.out.paired)
+
+    // MultiQC: fusionar informes de QC previo y posterior
     MULTIQC(
-        FASTQC.out.html.collect(),
-        FASTQC.out.zip.collect()
+        FASTQC_RAW.out.zip.collect(),
+        FASTQC_TRIMMED.out.zip.collect()
     )
 }
