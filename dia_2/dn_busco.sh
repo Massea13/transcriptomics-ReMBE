@@ -1,27 +1,30 @@
 #!/bin/bash --login
-#SBATCH -p multicore
 #SBATCH -J busco
-#SBATCH -n 4   
-#SBATCH -o busco_dn_%x.%j.out        # Standard output log
-#SBATCH -e busco_dn_%x.%j.err        # Standard error log
-#SBATCH -t 1-0        
+#SBATCH -c 4   # (or --ntasks=) where numcores is between 2 and 168.
+#SBATCH -o busco_plot%x.%j.out        # Standard output log
+#SBATCH -e busco_plot%x.%j.err        # Standard error log
+#SBATCH -t 1-0        # Wallclock limit (days-hours). Required!
+                      # Max permitted is 7 days (7-0).
 
-#/mnt/iusers01/fatpou01/bmh01/m23015df/trimmed/cleaned_kraken_2/filtered
-
-# Load any required modulefiles. A purge is used to start with a clean environment.
-#module load apps/gcc/angsd/936
 
 # Clean env
-#conda deactivate
 module purge
-module load miniforge/24.11.2
+module load spack
+module load miniconda3
+source activate trinity_taller
 
-conda activate busco_environment
+FASTA_FILE="/scratch/taller/datos_pez/transcriptoma_completo/GKNI01.1.fsa_nt.gz"
+OUT_DIR="calidad_ensamble"
 
-# Paths to the input files and output directories
-INPUT_FILE="trinity_denovo/Trinity-DN.fasta"
-OUTPUT_DIR="trinity_denovo/busco_pez_results"
+# Comandos de BUSCO (se hace una sola vez, tarda ~ 1 hora)
+busco -f -c 4 \
+       -o ${OUT_DIR} \
+       -i ${FASTA_FILE} \
+       -l vertebrata_odb10 \
+       -m transcriptome
 
-busco -f -c 16 -o $OUTPUT_DIR -i $INPUT_FILE -l vertebrata_odb10 -m transcriptome
+# Comandos para generar los plots de BUSCO (se hace una sola vez, tarda ~ 1 minuto)
+mkdir -p busco_plots
+cp ${OUT_DIR}/short_summary*.json busco_plots/
+busco --plot busco_plots --plot_percentages
 
-generate_plot.py -wd $OUTPUT_DIR
