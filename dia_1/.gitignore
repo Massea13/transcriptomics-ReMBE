@@ -1,4 +1,5 @@
 *.fastqc
+./quality-assessment/*
 ./quality-assessment/results/*
 ./scripts/*.err
 ./scripts/*.out
