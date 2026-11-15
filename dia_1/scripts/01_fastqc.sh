@@ -66,7 +66,7 @@ trimmomatic -version
 #----------------------------------------
 project="quality-assessment"
 home="/home/idalia/transcriptomics-ReMBE/dia_1"
-data="/scratch/taller/datos_oyamel/"
+data="/scratch/taller/datos_oyamel"
 scripts="/home/idalia/transcriptomics-ReMBE/dia_1/scripts"
 
 # Crear estructura de trabajo si no existe
@@ -93,9 +93,9 @@ export NXF_LOG_FILE="${home}/${project}/logs/nextflow.log"
 
 srun nextflow run "${scripts}/01_main.nf" \
     -profile cluster \
-    --reads  "${data}/RAW/*.fastq.gz" \
+    --reads "${data}/RAW/*.fastq.gz" \
     --outdir "${home}/${project}/results" \
-    --adapters "/ruta/a/tus/adapters.fa" \
+    --adapters "/home/idalia/miniconda3/envs/rembe_qc/share/trimmomatic-0.41-0/adapters/TruSeq3-PE-2.fa" \
     -with-report "${home}/${project}/logs/report.html" \
     -with-trace  "${home}/${project}/logs/trace.txt" \
     -with-timeline "${home}/${project}/logs/timeline.html" \
