@@ -10,11 +10,26 @@ params.adapters = null   // ruta al archivo de adaptadores, por ejemplo: /ruta/a
 // Canal: emparejar archivos R1/R2 por nombre de muestra
 //----------------------------------------
 Channel
-    .fromFilePairs(params.reads, size: 2, checkIfExists: true)
-    .ifEmpty { error "No se encontraron pares FASTQ con el patrón: ${params.reads}" }
+    .fromPath(params.reads)
+    .ifEmpty { error "No se encontraron FASTQ con el patrón: ${params.reads}" }
+    .map { file ->
+        def m = file.name =~ /^(.+)_R([12])_001\.fastq\.gz$/
+        if (!m.matches()) {
+            error "Archivo con nombre inesperado (no encaja con *_R[12]_001.fastq.gz): ${file.name}"
+        }
+        tuple(m[0][1], m[0][2], file)
+    }
+    .groupTuple(by: [0])
+    .map { sample, reads, files ->
+        if (files.size() != 2) {
+            error "La muestra ${sample} no tiene exactamente 2 archivos (R1+R2); tiene ${files.size()}: ${files*.name}"
+        }
+        def sorted = [reads, files].transpose().sort { it[0] }
+        tuple(sample, sorted.collect { it[1] })
+    }
     .set { fastq_pairs }
 
-fastq_pairs.view()   // depuración temporal
+fastq_pairs.view()
 
 //----------------------------------------
 // Proceso 1: FastQC (control de calidad previo al recorte)
