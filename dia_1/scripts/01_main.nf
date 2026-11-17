@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 params.reads    = null
 params.outdir   = "results"
-params.adapters = null   // ruta al archivo de adaptadores, por ejemplo: /ruta/adapters.fa
+params.adapters = null
 
 //----------------------------------------
 // Canal: emparejar archivos R1/R2 por nombre de muestra
@@ -37,7 +37,7 @@ fastq_pairs.view()
 process FASTQC_RAW {
     tag "${sample}"
     publishDir "${params.outdir}/fastqc_raw", mode: 'copy'
-    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
+    conda '/home/idalia/miniconda3/envs/rembe_qc'
 
     input:
     tuple val(sample), path(fastqs)
@@ -56,16 +56,19 @@ process FASTQC_RAW {
 //----------------------------------------
 process TRIM {
     tag "${sample}"
-    publishDir "${params.outdir}/trimmed", mode: 'copy'
-    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
+    publishDir "${params.outdir}/trimmed", mode: 'symlink'   // do not copy
+    conda '/home/idalia/miniconda3/envs/rembe_qc'
 
     input:
     tuple val(sample), path(reads)
     path adapters
 
     output:
-    tuple val(sample), path("${sample}_R1_paired.fastq.gz"), path("${sample}_R2_paired.fastq.gz"), emit: paired
-    path "${sample}_R*_unpaired.fastq.gz", emit: unpaired
+    tuple val(sample),
+          path("${sample}_R1_paired.fastq.gz"),
+          path("${sample}_R2_paired.fastq.gz"), emit: paired
+    tuple path("${sample}_R1_unpaired.fastq.gz"),
+          path("${sample}_R2_unpaired.fastq.gz"), emit: unpaired
 
     script:
     """
@@ -85,7 +88,7 @@ process TRIM {
 process FASTQC_TRIMMED {
     tag "${sample}"
     publishDir "${params.outdir}/fastqc_trimmed", mode: 'copy'
-    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
+    conda '/home/idalia/miniconda3/envs/rembe_qc'
 
     input:
     tuple val(sample), path(r1), path(r2)
@@ -105,11 +108,11 @@ process FASTQC_TRIMMED {
 process MULTIQC {
     tag "all_samples"
     publishDir "${params.outdir}/multiqc", mode: 'copy'
-    conda '/home/idalia/miniconda3/envs/rembe_qc'   // Usar directamente el rembe_qc
-    
+    conda '/home/idalia/miniconda3/envs/rembe_qc'
+
     input:
-    path raw_zips
-    path trim_zips
+    path raw_zips,  stageAs: 'fastqc_raw/*'
+    path trim_zips, stageAs: 'fastqc_trimmed/*'
 
     output:
     path "multiqc_report.html", emit: html
@@ -117,7 +120,7 @@ process MULTIQC {
 
     script:
     """
-    multiqc . -o .
+    multiqc fastqc_raw fastqc_trimmed -o .
     """
 }
 
@@ -126,15 +129,15 @@ process MULTIQC {
 //----------------------------------------
 workflow {
     // Canal del archivo de adaptadores
-    adapters_ch = Channel.fromPath(params.adapters, checkIfExists: true)
+    adapters_ch = Channel.fromPath(params.adapters, checkIfExists: true).first()
 
-    // QC previo
+    // QC previo sobre los RAW
     FASTQC_RAW(fastq_pairs)
 
     // Recorte
     TRIM(fastq_pairs, adapters_ch)
 
-    // QC posterior
+    // QC posterior sobre las reads recortadas (solo paired)
     FASTQC_TRIMMED(TRIM.out.paired)
 
     // MultiQC: fusionar informes de QC previo y posterior

@@ -1,108 +1,100 @@
 #!/bin/bash
-#SBATCH -J QC                 # Nombre del job
-#SBATCH -p short              # Partición
-#SBATCH -N 1                  # Nodos
-#SBATCH -c 4                  # Núcleos (subido de 1 a 4 para FastQC/MultiQC)
-#SBATCH --mem=8G              # Memoria (añadido, buena práctica)
-#SBATCH -t 02:00:00           # Tiempo máximo (añadido)
+#SBATCH -J QC
+#SBATCH -p short
+#SBATCH -N 1
+#SBATCH -c 4
+#SBATCH --mem=8G
+#SBATCH -t 24:00:00
 #SBATCH -o QC-%j.out
 #SBATCH -e QC-%j.err
 
-set -euo pipefail   # Detiene el script ante cualquier error
+set -euo pipefail
 
 #----------------------------------------
-# 1. Cargar módulos del cluster
+# 1. Cargar módulos del cluster (sin duplicar spack ni cargar miniconda3 del cluster)
 #----------------------------------------
 module load spack/1.0.2
 module load jdk/21.0.2-gcc-12.2.0-linux-almalinux9-x86_64-tsyhzjs
 module load nextflow
 
-# Forzar el uso del Java del módulo del clúster, sobrescribiendo JAVA_HOME de Conda
-export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
-export JAVA_CMD="${JAVA_HOME}/bin/java"
-export PATH="${JAVA_HOME}/bin:${PATH}"
-
-# Verificar
-java -version
-echo "JAVA_HOME=${JAVA_HOME}"
-
 #----------------------------------------
-# 2. Instalar Miniconda si no existe
+# 2. Cargar el conda base del usuario (solo para tener el comando `conda`)
 #----------------------------------------
 CONDA_DIR="$HOME/miniconda3"
 
 if [ ! -d "$CONDA_DIR" ]; then
-    echo "[INFO] Miniconda no encontrada. Instalando en $CONDA_DIR ..."
-    wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
-    bash /tmp/miniconda.sh -b -p "$CONDA_DIR"
-    rm /tmp/miniconda.sh
-    # Inicializar conda en bashrc (una sola vez)
-    "$CONDA_DIR/bin/conda" init bash
+    echo "[ERROR] No se encontró Miniconda en $CONDA_DIR." >&2
+    echo "[INFO] Instálala o carga el módulo de conda del cluster." >&2
+    exit 1
 fi
 
-# Cargar conda en esta sesión
 eval "$("$CONDA_DIR/bin/conda" shell.bash hook)"
 
 #----------------------------------------
-# 3. Crear el ambiente rembe_qc si no existe e instalar herramientas
+# 3. Activar el entorno COMPARTIDO por ruta absoluta
 #----------------------------------------
-if ! conda env list | grep -qE "^rembe_qc\s"; then
-    echo "[INFO] Creando ambiente conda 'rembe_qc' ..."
-    conda create -y -n rembe_qc -c bioconda -c conda-forge fastqc multiqc
-else
-    echo "[INFO] El ambiente 'rembe_qc' ya existe. Verificando paquetes ..."
-    conda install -y -n rembe_qc -c bioconda -c conda-forge fastqc multiqc trimmomatic
+SHARED_ENV="/home/idalia/miniconda3/envs/rembe_qc"
+
+if [ ! -d "$SHARED_ENV" ]; then
+    echo "[ERROR] El entorno compartido no existe: $SHARED_ENV" >&2
+    exit 1
 fi
 
-conda activate rembe_qc
+conda activate "$SHARED_ENV"
 
-# Verificación rápida
+# Verificar que las herramientas están disponibles
 fastqc --version
 multiqc --version
 trimmomatic -version
 
 #----------------------------------------
-# 4. Organización del proyecto
+# 4. Forzar Java del módulo (sobrescribe JAVA_HOME del entorno compartido)
+#----------------------------------------
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+export JAVA_CMD="${JAVA_HOME}/bin/java"
+export PATH="${JAVA_HOME}/bin:${PATH}"
+
+java -version
+echo "JAVA_HOME=${JAVA_HOME}"
+
+#----------------------------------------
+# 5. Rutas del proyecto
 #----------------------------------------
 project="quality-assessment"
 home="/home/idalia/transcriptomics-ReMBE/dia_1"
 data="/scratch/taller/datos_oyamel"
 scripts="/home/idalia/transcriptomics-ReMBE/dia_1/scripts"
 
-# Crear estructura de trabajo si no existe
-if [ ! -d "${home}/${project}" ]; then
-    echo "[INFO] El directorio ${home}/${project} no existe. Creando estructura..."
-    mkdir -p "${home}/${project}"/{work,results,logs}
-else
-    echo "[INFO] El directorio ${home}/${project} ya existe. Verificando subdirectorios..."
-    mkdir -p "${home}/${project}"/{work,results,logs}
+ADAPTERS="${SHARED_ENV}/share/trimmomatic-0.41-0/adapters/TruSeq3-PE-2.fa"
+
+if [ ! -f "$ADAPTERS" ]; then
+    echo "[ERROR] No se encontró el archivo de adaptadores: $ADAPTERS" >&2
+    echo "[INFO] Búscalo con: find ${SHARED_ENV} -name 'TruSeq3-PE-2.fa'" >&2
+    exit 1
 fi
 
-# Crear el directorio de scripts si no existe (está fuera de ${home}/${project})
-if [ ! -d "${scripts}" ]; then
-    echo "[INFO] Creando directorio de scripts: ${scripts}"
-    mkdir -p "${scripts}"
-fi
-
+#----------------------------------------
+# 6. Estructura de salida
+#----------------------------------------
+mkdir -p "${home}/${project}"/{work,results,logs}
 cd "${home}/${project}"
+
 #----------------------------------------
-# 5. Ejecutar Nextflow (dentro del job, con srun para que use los cores)
+# 7. Ejecutar Nextflow
 #----------------------------------------
-export NXF_WORK="${scripts}/${project}/work"
+export NXF_WORK="${home}/${project}/work"
 export NXF_LOG_FILE="${home}/${project}/logs/nextflow.log"
 
 srun nextflow run "${scripts}/01_main.nf" \
     -profile cluster \
     --reads "${data}/RAW/*.fastq.gz" \
     --outdir "${home}/${project}/results" \
-    --adapters "/home/idalia/miniconda3/envs/rembe_qc/share/trimmomatic-0.41-0/adapters/TruSeq3-PE-2.fa" \
+    --adapters "${ADAPTERS}" \
     -with-report "${home}/${project}/logs/report.html" \
     -with-trace  "${home}/${project}/logs/trace.txt" \
     -with-timeline "${home}/${project}/logs/timeline.html" \
     -resume
 
-
-#Remover  todos los módulos cargados
-
-#conda deactivate
-#module purge 
+echo "[INFO] Quality assessment completado."
+echo "[INFO] Resultados en: ${home}/${project}/results"
+echo "[INFO] Informe MultiQC: ${home}/${project}/results/multiqc/multiqc_report.html"
