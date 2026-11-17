@@ -9,21 +9,22 @@ c) Preparación y normalización para DEGs.
 
 
 # **¿Qué es un alineamiento con referencia?**
-En el análisis de un **transcriptoma**, el alineamiento con referencia consiste en comparar las lecturas de ARN obtenidas por secuenciación con un **genoma de referencia** o con una colección de transcritos conocidos (**transcriptoma de referencia**).Así se estima de qué gen o transcrito proviene cada lectura y luego se pueden cuantificar los niveles de expresión. (Dobin, 2015) (Mekso, 2022). Una alineación o cuantificación inexacta puede generar falsos positivos o falsos negativos en los análisis posteriores, lo que conlleva conclusiones erróneas.
+En el análisis de un transcriptoma, este proceso consiste en comparar las lecturas de secuenciación contra un genoma o un transcriptoma de referencia (colección de transcritos conocidos) para determinar su origen y cuantificar los niveles de expresión. Realizar este paso con precisión es crítico, ya que los errores de mapeo generan falsos positivos o negativos que comprometen las conclusiones del estudio. Si el organismo carece de una referencia adecuada o presenta alta divergencia genética respecto a ella, se perderán lecturas y se sesgarán las estimaciones.
 
-Existen varios métodos para la alineación y cuantificación, como BWA, Salmon, Kallisto y STAR, desarrollados para abordar los desafíos que plantean los datos de secuenciación de alto rendimiento generados por la secuenciación masiva de ARN. Estos métodos emplean diferentes algoritmos para alinear y cuantificar las lecturas de RNA-seq. Cada uno presenta ventajas y limitaciones, dependiendo del diseño experimental y la calidad de los datos de RNA-seq analizados.
- 
-Los ARN maduros suelen tener partes que corresponden a exones separados por intrones en el genoma. Por eso, al alinearlas contra el genoma, las herramientas deben permitir alineamientos “con saltos” entre exones y pueden ayudar a detectar empalmes o variantes de transcritos. (Trapnell, 2009) (Dobin, 2015)
+### ¿Por qué el RNA-seq necesita alineamiento especializado?
 
-Si el organismo no tiene una referencia adecuada, o su secuencia difiere mucho de la referencia disponible, el alineamiento puede perder lecturas o afectar la estimación de expresión. (Benjamin, 2014)(Munger, 2014)
-
-A diferencia del ADN genómico, las lecturas de RNA-seq derivadas de ARNm maduro no contienen intrones. Por ello, los alineadores de transcriptómica deben reconocer sitios de empalme (*splice junctions*) mapeando lecturas a través de exones distantes.
+A diferencia del ADN genómico, donde los exones están separados por intrones, el ARNm maduro ha pasado por el proceso de empalme (splicing), uniendo directamente exones que en el genoma están distantes. Por ello, una misma lectura puede abarcar dos exones distintos. Para mapear estas secuencias contra el genoma sin descartarlas, se requieren alineadores sensibles al empalme (splice-aware aligners), capaces de reconocer sitios de unión (splice junctions) y dividir el alineamiento a través de los intrones. 
 
 ![ADN-ARN](Figuras/ARN-ADN.png)
 
-Figura: Sharma et al., 2025
+| Estrategia                   | Qué compara                                                                       | Ventaja principal                                                                                          | Limitación importante                                                                                                                          |
+| ---------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Alinear al genoma**        | Lecturas contra el genoma, permitiendo uniones entre exones. | Puede localizar lecturas en regiones genómicas y detectar alineamientos empalmados. | Requiere manejar correctamente los saltos entre exones y las lecturas ambiguas.                                                 |
+| **Alinear al transcriptoma** | Lecturas contra transcritos anotados.                      | Puede ser una vía directa para estimar abundancias de transcritos conocidos.         | Las lecturas de transcritos no anotados pueden faltar en la referencia o asignarse erróneamente a secuencias parecidas.  |
 
-### 🧬 Pregunta rápida: Estrategias de alineamiento en RNA-seq
+Existen diversas herramientas, como STAR, BWA, Salmon y Kallisto, que emplean distintos algoritmos para resolver estos desafíos en datos de secuenciación masiva. La elección del método dependerá de las ventajas y limitaciones de cada uno frente al diseño experimental y la calidad de los datos.
+
+### 🧬 Pregunta: Estrategias de alineamiento en RNA-seq
 
 Si tu objetivo principal en un análisis de RNA-seq es **descubrir nuevas isoformas de empalme (splicing) o analizar regiones intrónicas y no codificantes**, ¿contra qué referencia debes alinear tus lecturas (*reads*)?
 
@@ -36,7 +37,7 @@ Si tu objetivo principal en un análisis de RNA-seq es **descubrir nuevas isofor
 <details>
   <summary><b>B)</b> Contra el genoma de referencia</summary>
   <br>
-  ✅ <b>¡Correcto!</b> El genoma de referencia incluye exones, intrones y regiones no codificantes, lo que permite detectar eventos de <i>splicing</i> alternativo nuevos y transcripción fuera de las anotaciones conocidas (Srivastava, 2020).
+  ✅ <b>¡Correcto!</b> El genoma de referencia incluye exones, intrones y regiones no codificantes, lo que permite detectar eventos de <i>splicing</i> alternativo nuevos y transcripción fuera de las anotaciones conocidas.
 </details>
 
 <details>
