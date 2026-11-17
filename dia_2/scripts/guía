@@ -1,0 +1,286 @@
+
+#Preparación de los datos 
+
+1.- (base) [jaahzel@hn ~]$ mkdir taller_rna_seq
+
+2.- (base) [jaahzel@hn ~]$ cd taller_rna_seq/
+
+3.- (base) [jaahzel@hn taller_rna_seq]$ ls
+
+4.- (base) [jaahzel@hn taller_rna_seq]$ mkdir -p datos
+
+5.- (base) [jaahzel@hn taller_rna_seq]$ ls
+datos
+
+6.- (base) [jaahzel@hn taller_rna_seq]$ cd datos/
+
+7.- (base) [jaahzel@hn datos]$ ln -s /scratch/marco/fastq/bioproject_985763/subsampled_10pct
+
+8.-(base) [jaahzel@hn datos]$ ls
+subsampled_10pct
+
+9.- (base) [jaahzel@hn datos]$ ln -s /scratch/taller/maco/scripts/*.sbatch .
+
+10.- (base) [jaahzel@hn datos]$ ls
+run_anotacion_10pct.sbatch  run_busco_10pct.sbatch  run_qc.sbatch  run_qc_trimmed.sbatch  run_trimmomatic.sbatch  run_trinity_trimmed.sbatch  subsampled_10pct
+
+11.- (base) [jaahzel@hn datos]$ ln -sf /scratch/marco/fastq/bioproject_985763/Trinity_10pct_final.fasta
+
+12.- (base) [jaahzel@hn datos]$ ls
+Trinity_10pct_final.fasta   run_busco_10pct.sbatch  run_qc_trimmed.sbatch   run_trinity_trimmed.sbatch
+run_anotacion_10pct.sbatch  run_qc.sbatch           run_trimmomatic.sbatch  subsampled_10pct
+
+13.- (base) [jaahzel@hn datos]$ ln -sf /scratch/marco/fastq/bioproject_985763/Trinity_10pct_final.gene_trans_map
+
+14.- (base) [jaahzel@hn datos]$ ls
+Trinity_10pct_final.fasta           run_anotacion_10pct.sbatch  run_qc.sbatch          run_trimmomatic.sbatch      subsampled_10pct
+Trinity_10pct_final.gene_trans_map  run_busco_10pct.sbatch      run_qc_trimmed.sbatch  run_trinity_trimmed.sbatch
+
+# Análisis de calidad 
+
+1.-(base) [jaahzel@hn datos]$ sbatch run_qc.sbatch
+Submitted batch job 9603
+
+2.-(base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+              9603     short qc_10pct  jaahzel  R       0:04      1 wn5
+2.1-(base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+
+3.- (base) [jaahzel@hn datos]$ ls
+Trinity_10pct_final.fasta           qc_10pct_9598.out  qc_resultados               run_qc.sbatch           run_trinity_trimmed.sbatch
+Trinity_10pct_final.gene_trans_map  qc_10pct_9603.err  run_anotacion_10pct.sbatch  run_qc_trimmed.sbatch   subsampled_10pct
+qc_10pct_9598.err                   qc_10pct_9603.out  run_busco_10pct.sbatch      run_trimmomatic.sbatch
+
+4.-(base) [jaahzel@hn datos]$ cd qc_resultados/
+
+5.- (base) [jaahzel@hn qc_resultados]$ ls
+SRR24971448_1_fastqc.html  SRR24971449_2_fastqc.html  SRR24971451_1_fastqc.html  SRR24971452_2_fastqc.html  SRR24971454_1_fastqc.html  SRR24971455_2_fastqc.html
+SRR24971448_1_fastqc.zip   SRR24971449_2_fastqc.zip   SRR24971451_1_fastqc.zip   SRR24971452_2_fastqc.zip   SRR24971454_1_fastqc.zip   SRR24971455_2_fastqc.zip
+SRR24971448_2_fastqc.html  SRR24971450_1_fastqc.html  SRR24971451_2_fastqc.html  SRR24971453_1_fastqc.html  SRR24971454_2_fastqc.html  multiqc_report
+SRR24971448_2_fastqc.zip   SRR24971450_1_fastqc.zip   SRR24971451_2_fastqc.zip   SRR24971453_1_fastqc.zip   SRR24971454_2_fastqc.zip
+SRR24971449_1_fastqc.html  SRR24971450_2_fastqc.html  SRR24971452_1_fastqc.html  SRR24971453_2_fastqc.html  SRR24971455_1_fastqc.html
+SRR24971449_1_fastqc.zip   SRR24971450_2_fastqc.zip   SRR24971452_1_fastqc.zip   SRR24971453_2_fastqc.zip   SRR24971455_1_fastqc.zip
+
+6.-(base) [jaahzel@hn qc_resultados]$ cd multiqc_report/
+
+7.- (base) [jaahzel@hn multiqc_report]$ ls
+multiqc_data  multiqc_report.html
+
+# Descargar el reporte multiqc_report.html
+
+1.-(base) [jaahzel@hn multiqc_report]$ pwd
+/home/jaahzel/taller_rna_seq/datos/qc_resultados/multiqc_report
+
+2.-(base) [jaahzel@hn multiqc_report]$ exit
+logout
+Connection to cluster.lancis.ecologia.unam.mx closed.
+
+3.-(base) MECH@LAPTOP-AIJ7IF30:~$ scp -r jaahzel@cluster.lancis.ecologia.unam.mx:/home/jaahzel/taller_rna_seq/datos/qc_resultados/multiqc_report .
+Warning: the ECDSA host key for 'cluster.lancis.ecologia.unam.mx' differs from the key for the IP address '132.247.90.169'
+Offending key for IP in /home/MECH/.ssh/known_hosts:6
+Matching host key in /home/MECH/.ssh/known_hosts:9
+Are you sure you want to continue connecting (yes/no)? yes
+jaahzel@cluster.lancis.ecologia.unam.mx's password:
+Permission denied, please try again.
+jaahzel@cluster.lancis.ecologia.unam.mx's password:
+fastqc_top_overrepresented_sequences_table.txt                                                                                        100% 1624     1.6KB/s   00:00
+fastqc_per_base_n_content_plot.txt                                                                                                    100%   20KB  20.0KB/s   00:00
+multiqc.parquet                                                                                                                       100%  120KB 120.0KB/s   00:00
+multiqc_sources.txt                                                                                                                   100% 1762     1.7KB/s   00:00
+fastqc_per_sequence_quality_scores_plot.txt                                                                                           100% 7074     6.9KB/s   00:00
+fastqc_per_sequence_gc_content_plot_Percentages.txt                                                                                   100%   44KB  44.4KB/s   00:00
+multiqc_general_stats.txt                                                                                                             100% 1368     1.3KB/s   00:00
+multiqc_software_versions.txt                                                                                                         100%   28     0.0KB/s   00:00
+fastqc-status-check-heatmap.txt                                                                                                       100%  973     1.0KB/s   00:00
+multiqc_fastqc.txt                                                                                                                    100% 3676     3.6KB/s   00:00
+fastqc_adapter_content_plot.txt                                                                                                       100%   25KB  25.0KB/s   00:00
+multiqc.log                                                                                                                           100%   13KB  13.5KB/s   00:00
+fastqc_sequence_duplication_levels_plot.txt                                                                                           100% 6775     6.6KB/s   00:00
+multiqc_data.json                                                                                                                     100% 1413KB   1.4MB/s   00:01
+fastqc_per_base_sequence_quality_plot.txt                                                                                             100%   21KB  21.1KB/s   00:00
+fastqc_per_sequence_gc_content_plot_Counts.txt                                                                                        100%   23KB  23.2KB/s   00:00
+fastqc_sequence_counts_plot.txt                                                                                                       100%  580     0.6KB/s   00:00
+llms-full.txt                                                                                                                         100%  140KB 139.8KB/s   00:00
+multiqc_citations.txt                                                                                                                 100%   62     0.1KB/s   00:00
+fastqc_overrepresented_sequences_plot.txt                                                                                             100%  644     0.6KB/s   00:00
+multiqc_report.html                                                                                                                   100% 2552KB   2.5MB/s   00:00
+
+4.-(base) MECH@LAPTOP-AIJ7IF30:~$ pwd
+/home/MECH
+
+#volvemos al cluster
+1.- (base) MECH@LAPTOP-AIJ7IF30:~$ ssh jaahzel@cluster.lancis.ecologia.unam.mx
+Warning: the ECDSA host key for 'cluster.lancis.ecologia.unam.mx' differs from the key for the IP address '132.247.90.169'
+Offending key for IP in /home/MECH/.ssh/known_hosts:6
+Matching host key in /home/MECH/.ssh/known_hosts:9
+Are you sure you want to continue connecting (yes/no)? yes
+jaahzel@cluster.lancis.ecologia.unam.mx's password:
+
+Hola Usuarios
+
+Pueden encontrar la guía rápida de uso en el directorio /guia_rapida_uso.txt
+
+$more /guia_rapida_uso.txt
+
+2.- (base) [jaahzel@hn ~]$ ls
+taller_rna_seq
+
+3.- (base) [jaahzel@hn ~]$ cd taller_rna_seq/
+
+4.- (base) [jaahzel@hn taller_rna_seq]$ ls
+datos
+5.- (base) [jaahzel@hn taller_rna_seq]$ cd datos/
+
+6.- (base) [jaahzel@hn datos]$ ls
+Trinity_10pct_final.fasta           qc_10pct_9603.err    qc_trimmed_9613.out         run_qc.sbatch               subsampled_10pct
+Trinity_10pct_final.gene_trans_map  qc_10pct_9603.out    qc_trimmed_resultados       run_qc_trimmed.sbatch       trim_10pct_9604.err
+qc_10pct_9598.err                   qc_resultados        run_anotacion_10pct.sbatch  run_trimmomatic.sbatch      trim_10pct_9604.out
+qc_10pct_9598.out                   qc_trimmed_9613.err  run_busco_10pct.sbatch      run_trinity_trimmed.sbatch  trimmed_reads
+
+#Trimming
+1.-(base) [jaahzel@hn datos]$ sbatch run_trimmomatic.sbatch
+Submitted batch job 9604
+
+2.-(base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+              9604     short trim_10p  jaahzel  R       8:23      1 wn5
+(base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+
+3.-(base) [jaahzel@hn datos]$ ls
+Trinity_10pct_final.fasta           qc_10pct_9598.out  qc_resultados               run_qc.sbatch           run_trinity_trimmed.sbatch  trim_10pct_9604.out
+Trinity_10pct_final.gene_trans_map  qc_10pct_9603.err  run_anotacion_10pct.sbatch  run_qc_trimmed.sbatch   subsampled_10pct            trimmed_reads
+qc_10pct_9598.err                   qc_10pct_9603.out  run_busco_10pct.sbatch      run_trimmomatic.sbatch  trim_10pct_9604.err
+
+4.- (base) [jaahzel@hn datos]$ grep -E "Input Read Pairs|Both Surviving" trimmed_reads/logs/*.log
+trimmed_reads/logs/SRR24971448_trimmomatic.log:Input Read Pairs: 3690947 Both Surviving: 3244307 (87.90%) Forward Only Surviving: 432104 (11.71%) Reverse Only Surviving: 3859 (0.10%) Dropped: 10677 (0.29%)
+trimmed_reads/logs/SRR24971449_trimmomatic.log:Input Read Pairs: 3989017 Both Surviving: 3622922 (90.82%) Forward Only Surviving: 354021 (8.87%) Reverse Only Surviving: 5132 (0.13%) Dropped: 6942 (0.17%)
+trimmed_reads/logs/SRR24971450_trimmomatic.log:Input Read Pairs: 5576753 Both Surviving: 5054267 (90.63%) Forward Only Surviving: 505772 (9.07%) Reverse Only Surviving: 7754 (0.14%) Dropped: 8960 (0.16%)
+trimmed_reads/logs/SRR24971451_trimmomatic.log:Input Read Pairs: 4202872 Both Surviving: 3800901 (90.44%) Forward Only Surviving: 389887 (9.28%) Reverse Only Surviving: 4991 (0.12%) Dropped: 7093 (0.17%)
+trimmed_reads/logs/SRR24971452_trimmomatic.log:Input Read Pairs: 4397365 Both Surviving: 3848773 (87.52%) Forward Only Surviving: 535541 (12.18%) Reverse Only Surviving: 4261 (0.10%) Dropped: 8790 (0.20%)
+trimmed_reads/logs/SRR24971453_trimmomatic.log:Input Read Pairs: 4898898 Both Surviving: 4575080 (93.39%) Forward Only Surviving: 310382 (6.34%) Reverse Only Surviving: 8143 (0.17%) Dropped: 5293 (0.11%)
+trimmed_reads/logs/SRR24971454_trimmomatic.log:Input Read Pairs: 4949811 Both Surviving: 4491436 (90.74%) Forward Only Surviving: 444109 (8.97%) Reverse Only Surviving: 6068 (0.12%) Dropped: 8198 (0.17%)
+trimmed_reads/logs/SRR24971455_trimmomatic.log:Input Read Pairs: 5593217 Both Surviving: 5106421 (91.30%) Forward Only Surviving: 471671 (8.43%) Reverse Only Surviving: 7849 (0.14%) Dropped: 7276 (0.13%)
+
+5.- (base) [jaahzel@hn datos]$ cd trimmed_reads/
+
+6.- (base) [jaahzel@hn trimmed_reads]$ ls
+logs  paired  unpaired
+
+7.- (base) [jaahzel@hn trimmed_reads]$ cd paired/
+
+8.- (base) [jaahzel@hn paired]$ ls
+SRR24971448_1.paired.fastq.gz  SRR24971450_1.paired.fastq.gz  SRR24971452_1.paired.fastq.gz  SRR24971454_1.paired.fastq.gz
+SRR24971448_2.paired.fastq.gz  SRR24971450_2.paired.fastq.gz  SRR24971452_2.paired.fastq.gz  SRR24971454_2.paired.fastq.gz
+SRR24971449_1.paired.fastq.gz  SRR24971451_1.paired.fastq.gz  SRR24971453_1.paired.fastq.gz  SRR24971455_1.paired.fastq.gz
+SRR24971449_2.paired.fastq.gz  SRR24971451_2.paired.fastq.gz  SRR24971453_2.paired.fastq.gz  SRR24971455_2.paired.fastq.gz
+
+cd ..
+cd ..
+
+#análisis de calidad del trimmed
+
+1.- (base) [jaahzel@hn datos]$ sbatch run_qc_trimmed.sbatch
+Submitted batch job 9613
+
+2.- (base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+              9613     short qc_trimm  jaahzel  R       0:05      1 wn7
+(base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+
+3.- (base) [jaahzel@hn datos]$ ls
+Trinity_10pct_final.fasta           qc_10pct_9603.err    qc_trimmed_9613.out         run_qc.sbatch               subsampled_10pct
+Trinity_10pct_final.gene_trans_map  qc_10pct_9603.out    qc_trimmed_resultados       run_qc_trimmed.sbatch       trim_10pct_9604.err
+qc_10pct_9598.err                   qc_resultados        run_anotacion_10pct.sbatch  run_trimmomatic.sbatch      trim_10pct_9604.out
+qc_10pct_9598.out                   qc_trimmed_9613.err  run_busco_10pct.sbatch      run_trinity_trimmed.sbatch  trimmed_reads
+
+#Lanzamos el esamble 
+1.- (base) [jaahzel@hn datos]$ sbatch run_trinity_trimmed.sbatch
+Submitted batch job 9630
+
+2.- (base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+              9630      long trinity_  jaahzel  R       0:12      1 wn11
+#Ahí se quedará unos días...
+
+#Vamos a evaluar un esamble con busco 
+1.-(base) [jaahzel@hn datos]$ sbatch run_busco_10pct.sbatch
+Submitted batch job 9632
+
+2.- (base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+              9630      long trinity_  jaahzel  R      12:39      1 wn11
+              9632     short busco_10  jaahzel  R       0:04      1 wn5
+#Tarda casi una hora 
+
+# anotación de un transcriptoma de novo
+ (base) [jaahzel@hn datos]$ sbatch run_anotacion_10pct.sbatch
+Submitted batch job 9633
+(base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+              9630      long trinity_  jaahzel  R      20:02      1 wn11
+              9633     short anot_10p  jaahzel  R       0:03      1 wn6
+              9632     short busco_10  jaahzel  R       7:27      1 wn5
+#tarda un poco 
+
+#Parece que terminó BUSCO:
+1.- (base) [jaahzel@hn datos]$ squeue -u jaahzel
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+              9630      long trinity_  jaahzel  R      20:38      1 wn11
+              9633     short anot_10p  jaahzel  R       0:39      1 wn6
+2.- (base) [jaahzel@hn datos]$ ls
+Trinity_10pct_final.fasta           busco_10pct_9631.err  qc_10pct_9598.out    qc_trimmed_resultados       run_trinity_trimmed.sbatch  trinity_trim_9630.out
+Trinity_10pct_final.gene_trans_map  busco_10pct_9631.out  qc_10pct_9603.err    run_anotacion_10pct.sbatch  subsampled_10pct
+anot_10pct_9633.err                 busco_10pct_9632.err  qc_10pct_9603.out    run_busco_10pct.sbatch      trim_10pct_9604.err
+anot_10pct_9633.out                 busco_10pct_9632.out  qc_resultados        run_qc.sbatch               trim_10pct_9604.out
+anotacion_10pct                     ensamblado_10pct      qc_trimmed_9613.err  run_qc_trimmed.sbatch       trimmed_reads
+busco_10pct                         qc_10pct_9598.err     qc_trimmed_9613.out  run_trimmomatic.sbatch      trinity_trim_9630.err
+
+3.- (base) [jaahzel@hn datos]$ cd busco_10pct/
+
+4.- (base) [jaahzel@hn busco_10pct]$ ls
+logs  run_metazoa_odb10  short_summary.specific.metazoa_odb10.busco_10pct.json  short_summary.specific.metazoa_odb10.busco_10pct.txt  tmp
+
+5.-(base) [jaahzel@hn busco_10pct]$ cat short_summary.specific.metazoa_odb10.busco_10pct.txt
+# BUSCO version is: 6.1.0
+# The lineage dataset is: metazoa_odb10 (Creation date: 2024-01-08, number of genomes: 65, number of BUSCOs: 954)
+# Summarized benchmarking in BUSCO notation for file /scratch/marco/fastq/bioproject_985763/Trinity_10pct_final.fasta
+# BUSCO was run in mode: euk_tran
+
+        ***** Results: *****
+
+        C:87.3%[S:67.2%,D:20.1%],F:7.0%,M:5.7%,n:954
+        833     Complete BUSCOs (C)
+        641     Complete and single-copy BUSCOs (S)
+        192     Complete and duplicated BUSCOs (D)
+        67      Fragmented BUSCOs (F)
+        54      Missing BUSCOs (M)
+        954     Total BUSCO groups searched
+
+Dependencies and versions:
+        hmmsearch: 3.4
+        metaeuk: 7.bba0d80
+
+# resultados de la anotación
+1.- (base) [jaahzel@hn datos]$ ls -lh anotacion_10pct/
+total 136M
+-rw-r--r-- 1 jaahzel jaahzel 4.6M Nov 16 19:07 Trinity_10pct_final.fasta.transdecoder.bed
+-rw-r--r-- 1 jaahzel jaahzel  34M Nov 16 19:08 Trinity_10pct_final.fasta.transdecoder.cds
+-rw-r--r-- 1 jaahzel jaahzel  21M Nov 16 19:07 Trinity_10pct_final.fasta.transdecoder.gff3
+-rw-r--r-- 1 jaahzel jaahzel  14M Nov 16 19:07 Trinity_10pct_final.fasta.transdecoder.pep
+drwxr-xr-x 5 jaahzel jaahzel 4.0K Nov 16 19:07 Trinity_10pct_final.fasta.transdecoder_dir
+-rw-r--r-- 1 jaahzel jaahzel  45M Nov 16 19:26 Trinity_10pct_funcional.emapper.annotations
+-rw-r--r-- 1 jaahzel jaahzel  18M Nov 16 19:26 Trinity_10pct_funcional.emapper.hits
+-rw-r--r-- 1 jaahzel jaahzel 2.3M Nov 16 19:26 Trinity_10pct_funcional.emapper.seed_orthologs
+
+2.- (base) [jaahzel@hn datos]$ grep -c "^>" anotacion_10pct/*.transdecoder.pep
+27963
+
+3.- (base) [jaahzel@hn datos]$ grep -v "^#" anotacion_10pct/*.emapper.annotations | wc -l
+25863
+
+#resultados del esamble 
+
+
