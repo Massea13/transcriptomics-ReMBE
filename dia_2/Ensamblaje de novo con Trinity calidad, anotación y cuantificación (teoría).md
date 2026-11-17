@@ -1,4 +1,4 @@
-1.-Ensamblaje de novo con Trinity: calidad, anotación y cuantificación (teoría)
+Parte 1 Ensamblaje de novo con Trinity: calidad, anotación y cuantificación (teoría)
 
 Este documento cubre la primera mitad de la teoría (45 min): cómo se ensambla un transcriptoma de novo con Trinity, cómo se evalúa y anota el ensamblaje, y cómo se cuantifica la expresión mapeando las lecturas contra él.
 
