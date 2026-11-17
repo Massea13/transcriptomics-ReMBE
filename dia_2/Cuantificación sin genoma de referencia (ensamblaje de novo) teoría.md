@@ -1,4 +1,4 @@
-# 2.-Cuantificación sin Genoma de referencia (ensamblaje de novo): teoría
+# Parte 2 Cuantificación sin Genoma de referencia (ensamblaje de novo): teoría
 
 Esta sección enseña a cuantificar la expresión génica cuando no hay genoma ni transcriptoma de referencia: primero se ensambla el transcriptoma con Trinity y después se pseudoalinean las lecturas contra ese ensamblaje.
 
