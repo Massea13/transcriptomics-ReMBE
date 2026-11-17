@@ -8,3 +8,5 @@
 ./resultados/*
 ./quality-assessment/.nextflow/
 ./scripts/quality-assessment/
+./quality-assessment/results/
+./quality-assessment/work/
