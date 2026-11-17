@@ -19,7 +19,7 @@ Si el organismo no tiene una referencia adecuada, o su secuencia difiere mucho d
 
 A diferencia del ADN genómico, las lecturas de RNA-seq derivadas de ARNm maduro no contienen intrones. Por ello, los alineadores de transcriptómica deben reconocer sitios de empalme (*splice junctions*) mapeando lecturas a través de exones distantes.
 
-![ADN-ARN](Figuras/ADN-ARN.png)
+![ADN-ARN](Figuras/ARN-ADN.png)
 
 Figura: Sharma et al., 2025
 
