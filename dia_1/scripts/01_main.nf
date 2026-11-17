@@ -56,7 +56,7 @@ process FASTQC_RAW {
 //----------------------------------------
 process TRIM {
     tag "${sample}"
-    publishDir "${params.outdir}/trimmed", mode: 'copy'
+    publishDir "${params.outdir}/trimmed", mode: 'symlink'   // do not copy
     conda '/home/idalia/miniconda3/envs/rembe_qc'
 
     input:
