@@ -129,7 +129,7 @@ process MULTIQC {
 //----------------------------------------
 workflow {
     // Canal del archivo de adaptadores
-    adapters_ch = Channel.fromPath(params.adapters, checkIfExists: true)
+    adapters_ch = Channel.fromPath(params.adapters, checkIfExists: true).first()
 
     // QC previo sobre los RAW
     FASTQC_RAW(fastq_pairs)
