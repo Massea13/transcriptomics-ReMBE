@@ -4,14 +4,12 @@ Sesión 3: Construcción de Índices y Cuantificación con transcriptoma de Refe
 
 Teoría (1 hora):
 a) Alineamiento y pseudoalineamiento con referencia. Ventajas y desventajas de cada uno.
-b) Unidades de expresión y sesgos técnicos
-c) Preparación y normalización para DEGs
-
+b) Unidades de expresión y sesgos técnicos.
+c) Preparación y normalización para DEGs.
 
 
 # **¿Qué es un alineamiento con referencia?**
-En el análisis de un **transcriptoma**, el alineamiento con referencia consiste en comparar las lecturas de ARN obtenidas por secuenciación con un **genoma de referencia** o con una colección de transcritos conocidos (**transcriptoma de referencia**).Así se estima de qué gen o transcrito proviene cada lectura y luego se pueden cuantificar los niveles de expresión. (Dobin, 2015) (Mekso, 2022).
- Una alineación o cuantificación inexacta puede generar falsos positivos o falsos negativos en los análisis posteriores, lo que conlleva conclusiones erróneas.
+En el análisis de un **transcriptoma**, el alineamiento con referencia consiste en comparar las lecturas de ARN obtenidas por secuenciación con un **genoma de referencia** o con una colección de transcritos conocidos (**transcriptoma de referencia**).Así se estima de qué gen o transcrito proviene cada lectura y luego se pueden cuantificar los niveles de expresión. (Dobin, 2015) (Mekso, 2022). Una alineación o cuantificación inexacta puede generar falsos positivos o falsos negativos en los análisis posteriores, lo que conlleva conclusiones erróneas.
 
 Existen varios métodos para la alineación y cuantificación, como BWA, Salmon, Kallisto y STAR, desarrollados para abordar los desafíos que plantean los datos de secuenciación de alto rendimiento generados por la secuenciación masiva de ARN. Estos métodos emplean diferentes algoritmos para alinear y cuantificar las lecturas de RNA-seq. Cada uno presenta ventajas y limitaciones, dependiendo del diseño experimental y la calidad de los datos de RNA-seq analizados.
  
@@ -21,8 +19,31 @@ Si el organismo no tiene una referencia adecuada, o su secuencia difiere mucho d
 
 A diferencia del ADN genómico, las lecturas de RNA-seq derivadas de ARNm maduro no contienen intrones. Por ello, los alineadores de transcriptómica deben reconocer sitios de empalme (*splice junctions*) mapeando lecturas a través de exones distantes.
 
-![ADN-ARN](Figuras/ADN-ARN.jpeg)
+![ADN-ARN](Figuras/ADN-ARN.png)
 
+Figura: Sharma et al., 2025
+
+### 🧬 Pregunta rápida: Estrategias de alineamiento en RNA-seq
+
+Si tu objetivo principal en un análisis de RNA-seq es **descubrir nuevas isoformas de empalme (splicing) o analizar regiones intrónicas y no codificantes**, ¿contra qué referencia debes alinear tus lecturas (*reads*)?
+
+<details>
+  <summary><b>A)</b> Contra el transcriptoma de referencia</summary>
+  <br>
+  ❌ <b>Incorrecto.</b> El transcriptoma de referencia está formado únicamente por secuencias de transcritos ya anotados (principalmente exones maduros), por lo que perderías información de intrones, regiones intergénicas o isoformas no anotadas previamente.
+</details>
+
+<details>
+  <summary><b>B)</b> Contra el genoma de referencia</summary>
+  <br>
+  ✅ <b>¡Correcto!</b> El genoma de referencia incluye exones, intrones y regiones no codificantes, lo que permite detectar eventos de <i>splicing</i> alternativo nuevos y transcripción fuera de las anotaciones conocidas (Srivastava, 2020).
+</details>
+
+<details>
+  <summary><b>C)</b> Es indistinto, ambos contienen exactamente las mismas secuencias</summary>
+  <br>
+  ❌ <b>Incorrecto.</b> Aunque provienen del mismo organismo, el genoma contiene toda la secuencia genómica (incluyendo intrones y regiones no codificantes), mientras que el transcriptoma solo contiene las secuencias de los transcritos procesados y anotados.
+</details>
 
 ### 1. Estrategias de Mapeo: Del Genoma al Transcriptoma de Referencia
 
@@ -116,15 +137,15 @@ El número de lecturas asignadas a un gen depende, entre otras cosas, de **cuán
 
 La normalización busca reducir esas diferencias técnicas y, para comparaciones entre muestras, también corregir los cambios en la **composición global** de las lecturas. Por ejemplo, si unos pocos genes son extremadamente abundantes en una muestra, pueden ocupar una mayor proporción de las lecturas y hacer que otros genes parezcan menos expresados. (Robinson, 2010)(p2) (p3)
 
-Para una comparación estándar de **expresión diferencial a nivel de gen**, suele partirse de conteos de lecturas y usar un método basado en modelos de conteo, como **DESeq2** —con factores de tamaño estimados por la mediana de razones— o **edgeR**, que ofrece la normalización TMM. Ambos incorporan factores de normalización al análisis estadístico; no es necesario convertir primero los conteos a TPM para hacer la prueba diferencial. (Love, 2014)(p2) (p14) (Robinson, 2010)(p3)
+Para una comparación estándar de **expresión diferencial a nivel de gen**, suele partirse de conteos de lecturas y usar un método basado en modelos de conteo, como **DESeq2** —con factores de tamaño estimados por la mediana de razones— o **edgeR**, que ofrece la normalización TMM. Ambos incorporan factores de normalización al análisis estadístico; no es necesario convertir primero los conteos a TPM para hacer la prueba diferencial. (Love, 2014) (Robinson, 2010)
 
-La corrección por longitud sirve principalmente para estimar y comparar abundancias entre **genes o transcritos de distinto tamaño**. En cambio, al comparar el mismo gen entre muestras, la longitud del gen normalmente es constante; por eso, dividir rutinariamente cada conteo por la longitud antes de una prueba diferencial puede no ser apropiado. TPM y RPKM consideran longitud y profundidad, pero sus valores son relativos a la composición de la muestra y no siempre son directamente comparables entre condiciones. (Zhao, 2020) (Robinson, 2010)(p2)
+La corrección por longitud sirve principalmente para estimar y comparar abundancias entre **genes o transcritos de distinto tamaño**. En cambio, al comparar el mismo gen entre muestras, la longitud del gen normalmente es constante; por eso, dividir rutinariamente cada conteo por la longitud antes de una prueba diferencial puede no ser apropiado. TPM y RPKM consideran longitud y profundidad, pero sus valores son relativos a la composición de la muestra y no siempre son directamente comparables entre condiciones. (Zhao, 2020) (Robinson, 2010)
 
 ***
 
 
 # Métricas de normalización (TPM, CPM, FPKM/RPKM)
-Estas medidas convierten los conteos de lecturas o fragmentos en valores ajustados por **profundidad de secuenciación** y, en algunos casos, por **longitud**. La diferencia clave es que **CPM no corrige por longitud**, mientras que **RPKM, FPKM y TPM sí lo hacen**. (Zhao, 2021)(p3) (Aanes, 2014)(p2)
+Estas medidas convierten los conteos de lecturas o fragmentos en valores ajustados por **profundidad de secuenciación** y, en algunos casos, por **longitud**. La diferencia clave es que **CPM no corrige por longitud**, mientras que **RPKM, FPKM y TPM sí lo hacen**. (Zhao, 2021)(Aanes, 2014)
 
 
 Los paquetes estadísticos dominantes emplean métodos de normalización robustos a la presencia de genes altamente expresados desproporcionadamente:
@@ -196,24 +217,24 @@ Sea $C\_i$ el conteo asignado al gen o transcrito $i$, $L\_i$ su longitud en bas
 
 En **CPM**, el conteo de cada gen se divide por el tamaño de la biblioteca y se expresa por millón; según el análisis, el conteo puede ser de lecturas o de fragmentos. Como CPM no considera longitud, sirve para ajustar el tamaño de la biblioteca, pero no para comparar directamente la abundancia de genes de longitudes muy distintas. (Aanes, 2014)(p2)
 
-**RPKM** divide los conteos por la longitud del gen o transcrito —en kilobases— y por el número de lecturas mapeadas —en millones—. La corrección por longitud permite comparar, dentro de una muestra, unidades de distinto tamaño; la corrección por millón ajusta la profundidad de secuenciación. (Zhao, 2021)(p3)
+**RPKM** divide los conteos por la longitud del gen o transcrito —en kilobases— y por el número de lecturas mapeadas —en millones—. La corrección por longitud permite comparar, dentro de una muestra, unidades de distinto tamaño; la corrección por millón ajusta la profundidad de secuenciación. (Zhao, 2021)
 
-**FPKM** aplica una idea equivalente a RPKM, pero cuenta **fragmentos** en lugar de lecturas, por lo que se asocia especialmente con secuenciación *paired-end*: los dos extremos secuenciados de un mismo fragmento se consideran una sola unidad de fragmento para cuantificarlo. (Zhao, 2021)(p3) La distinción entre FPKM y RPKM está, por tanto, en qué se cuenta; ambos ajustan por longitud y tamaño de biblioteca. (p3)
+**FPKM** aplica una idea equivalente a RPKM, pero cuenta **fragmentos** en lugar de lecturas, por lo que se asocia especialmente con secuenciación *paired-end*: los dos extremos secuenciados de un mismo fragmento se consideran una sola unidad de fragmento para cuantificarlo. (Zhao, 2021)(p3) La distinción entre FPKM y RPKM está, por tanto, en qué se cuenta; ambos ajustan por longitud y tamaño de biblioteca. 
 
-**TPM** también corrige por longitud, pero cambia el orden de la normalización: primero divide cada conteo por la longitud y después reescala esos valores para que la suma de TPM de las unidades cuantificadas en cada muestra sea un millón. (Zhao, 2021)(p3) Por esa propiedad, la suma de TPM es igual entre muestras, mientras que la suma de RPKM o FPKM no está fijada del mismo modo. (p3)
+**TPM** también corrige por longitud, pero cambia el orden de la normalización: primero divide cada conteo por la longitud y después reescala esos valores para que la suma de TPM de las unidades cuantificadas en cada muestra sea un millón. (Zhao, 2021)(p3) Por esa propiedad, la suma de TPM es igual entre muestras, mientras que la suma de RPKM o FPKM no está fijada del mismo modo. 
 
 ### ¿Cómo interpretarlas para genes y transcritos?
 
-A **nivel de transcrito**, cada unidad corresponde a una isoforma y su longitud puede ser distinta de la de otras isoformas del mismo gen; por eso, la cuantificación requiere estimar qué lecturas o fragmentos corresponden a cada transcrito. (Zhao, 2021)(p2) A **nivel de gen**, las lecturas de varias isoformas pueden resumirse en un solo valor, pero definir la longitud representativa del gen no siempre es sencillo cuando sus isoformas tienen longitudes diferentes. (Zheng, 2011)(p5)
+A **nivel de transcrito**, cada unidad corresponde a una isoforma y su longitud puede ser distinta de la de otras isoformas del mismo gen; por eso, la cuantificación requiere estimar qué lecturas o fragmentos corresponden a cada transcrito. (Zhao, 2021) A **nivel de gen**, las lecturas de varias isoformas pueden resumirse en un solo valor, pero definir la longitud representativa del gen no siempre es sencillo cuando sus isoformas tienen longitudes diferentes. (Zheng, 2011)
 
-Las longitudes utilizadas por los programas no siempre son simplemente la longitud total anotada: en la cuantificación de transcritos pueden emplearse **longitudes efectivas**, que consideran qué fragmentos podrían haber sido observados dadas las características de la secuenciación. (Lee, 2010) Por tanto, los valores calculados por distintas herramientas pueden diferir si usan métodos o estimaciones de longitud distintos. (Zhao, 2021)(p12)
+Las longitudes utilizadas por los programas no siempre son simplemente la longitud total anotada: en la cuantificación de transcritos pueden emplearse **longitudes efectivas**, que consideran qué fragmentos podrían haber sido observados dadas las características de la secuenciación. (Lee, 2010) Por tanto, los valores calculados por distintas herramientas pueden diferir si usan métodos o estimaciones de longitud distintos. (Zhao, 2021)
 
 ### Ventajas y límites prácticos
 
-* **CPM** es sencillo y útil para expresar conteos ajustados por tamaño de biblioteca, pero no normaliza por longitud; no es una medida directa para comparar genes de tamaños diferentes. (Aanes, 2014)(p2)
-* **RPKM y FPKM** facilitan la comparación relativa entre genes o transcritos dentro de una muestra al ajustar por longitud y profundidad, pero sus valores pueden depender de la composición de la muestra. (Zhao, 2021)(p2) (Zhao, 2020)
-* **TPM** facilita la lectura de abundancias relativas dentro de cada muestra porque sus valores suman un millón, pero eso **no garantiza** que un valor de TPM sea directamente comparable entre muestras si cambia mucho la composición de los ARN secuenciados. (Zhao, 2021)(p2) (Zhao, 2020)
-* Ninguna de estas unidades corrige automáticamente todos los sesgos técnicos, como los relacionados con composición de secuencia, protocolo o cambios específicos de longitud entre muestras. (Zheng, 2011)(p2) (Mandelboum, 2019)(p2)
+* **CPM** es sencillo y útil para expresar conteos ajustados por tamaño de biblioteca, pero no normaliza por longitud; no es una medida directa para comparar genes de tamaños diferentes. (Aanes, 2014)
+* **RPKM y FPKM** facilitan la comparación relativa entre genes o transcritos dentro de una muestra al ajustar por longitud y profundidad, pero sus valores pueden depender de la composición de la muestra. (Zhao, 2021)(Zhao, 2020)
+* **TPM** facilita la lectura de abundancias relativas dentro de cada muestra porque sus valores suman un millón, pero eso **no garantiza** que un valor de TPM sea directamente comparable entre muestras si cambia mucho la composición de los ARN secuenciados. (Zhao, 2021) (Zhao, 2020)
+* Ninguna de estas unidades corrige automáticamente todos los sesgos técnicos, como los relacionados con composición de secuencia, protocolo o cambios específicos de longitud entre muestras. (Zheng, 2011)(Mandelboum, 2019)
 
 
 Supongamos que evaluamos cuánto se leen dos libros en dos bibliotecas diferentes:
@@ -288,7 +309,7 @@ Los metadatos deben tener una fila por muestra e incluir la condición experimen
 
 ### 2. Importar, comprobar y ordenar
 
-El siguiente ejemplo lee ambos CSV, usa los identificadores como nombres de fila y reordena los metadatos para que sigan exactamente el orden de las columnas de conteos. DESeq2 requiere conteos no negativos enteros y una descripción de diseño experimental. (Love, 2015)(p11) (p14)
+El siguiente ejemplo lee ambos CSV, usa los identificadores como nombres de fila y reordena los metadatos para que sigan exactamente el orden de las columnas de conteos. DESeq2 requiere conteos no negativos enteros y una descripción de diseño experimental. (Love, 2015)
 
 ```r
 library(DESeq2)
@@ -333,11 +354,11 @@ stopifnot(all(counts == round(counts)))
 storage.mode(counts) <- "integer"
 ```
 
-**No redondees TPM/FPKM/CPM para convertirlos en conteos:** esas medidas no son conteos crudos y no cumplen el tipo de entrada esperado por el modelo de DESeq2. (Love, 2015)(p3) (p11)
+**No redondees TPM/FPKM/CPM para convertirlos en conteos:** esas medidas no son conteos crudos y no cumplen el tipo de entrada esperado por el modelo de DESeq2. (Love, 2015)
 
 ### 3. Definir la condición y crear el objeto de DESeq2
 
-Conviene establecer explícitamente el grupo de referencia —por ejemplo, el control— y revisar el diseño antes de ejecutar el análisis. Si hay un lote que debe controlarse y no está confundido con la condición, se puede incluir en la fórmula. (Love, 2015)(p11)
+Conviene establecer explícitamente el grupo de referencia —por ejemplo, el control— y revisar el diseño antes de ejecutar el análisis. Si hay un lote que debe controlarse y no está confundido con la condición, se puede incluir en la fórmula. (Love, 2015)
 
 ```r
 metadata$condition <- factor(metadata$condition)
@@ -359,7 +380,7 @@ dds <- DESeqDataSetFromMatrix(
 dds
 ```
 
-La fórmula `~ condition` compara los niveles de la variable `condition`; una fórmula como `~ batch + condition` incluye el lote como factor del diseño. La estructura del diseño debe reflejar cómo se organizaron realmente las muestras. (Love, 2015)(p11)
+La fórmula `~ condition` compara los niveles de la variable `condition`; una fórmula como `~ batch + condition` incluye el lote como factor del diseño. La estructura del diseño debe reflejar cómo se organizaron realmente las muestras. (Love, 2015)
 
 ### 4. Revisiones recomendadas antes de continuar
 
@@ -381,27 +402,26 @@ sum(rowSums(counts(dds)) == 0)
 table(metadata$condition)
 ```
 
-Si los conteos se obtuvieron desde archivos de alineamiento, comprueba que los nombres de cromosomas de la anotación coincidan con los de la referencia usada para alinearlos; nombres incompatibles pueden impedir asignar lecturas a genes. (Love, 2015)(p5)
+Si los conteos se obtuvieron desde archivos de alineamiento, comprueba que los nombres de cromosomas de la anotación coincidan con los de la referencia usada para alinearlos; nombres incompatibles pueden impedir asignar lecturas a genes. (Love, 2015)
 
-Los genes con conteos nulos o muy bajos pueden filtrarse antes del análisis, con un criterio adecuado al diseño y la profundidad; DESeq2 también aplica filtrado independiente en los resultados para reducir pruebas poco informativas. (Love, 2015)(p14) (Love, 2014)(p6)
+Los genes con conteos nulos o muy bajos pueden filtrarse antes del análisis, con un criterio adecuado al diseño y la profundidad; DESeq2 también aplica filtrado independiente en los resultados para reducir pruebas poco informativas. (Love, 2015)(Love, 2014)
 
-**En resumen:** importa los conteos crudos y los metadatos por separado, verifica y alinea explícitamente las muestras, define la condición de referencia y el diseño, y solo entonces crea el objeto `DESeqDataSet`. (Love, 2015)(p3)
-
+**En resumen:** importa los conteos crudos y los metadatos por separado, verifica y alinea explícitamente las muestras, define la condición de referencia y el diseño, y solo entonces crea el objeto `DESeqDataSet`. (Love, 2015)
 
 # Filtrado de genes con baja expresión (ej. < 1 CPM en la mayoría de las muestras).
            Normalización: TMM (Trimmed Mean of M-values) y su implementación en edgeR y DESeq2.
 
 ## Filtrado de baja expresión y normalización TMM
 
-Para análisis de expresión diferencial (DEGs), el filtrado y la normalización resuelven problemas distintos: el **filtrado** elimina genes con tan poca información que difícilmente se pueden evaluar con fiabilidad; **TMM** ajusta diferencias de composición entre bibliotecas que no se explican solo por el total de lecturas. (Chen, 2016)(p6) (p7)
+Para análisis de expresión diferencial (DEGs), el filtrado y la normalización resuelven problemas distintos: el **filtrado** elimina genes con tan poca información que difícilmente se pueden evaluar con fiabilidad; **TMM** ajusta diferencias de composición entre bibliotecas que no se explican solo por el total de lecturas. (Chen, 2016)
 
 ### 1. Filtrar genes de baja expresión
 
-Un umbral como **1 CPM en la mayoría de las muestras** puede servir como orientación, pero no es una regla universal. La cantidad de muestras en que se exige superar el umbral debe corresponder al diseño: por ejemplo, a cuántas réplicas hay en el grupo más pequeño. En un ejemplo de edgeR, se retuvieron genes con más de 0,5 CPM en al menos dos bibliotecas porque había dos réplicas por grupo; los autores indican que el criterio debe conservar genes que tengan expresión suficiente en las réplicas de al menos un grupo. (Chen, 2016)(p6)
+Un umbral como **1 CPM en la mayoría de las muestras** puede servir como orientación, pero no es una regla universal. La cantidad de muestras en que se exige superar el umbral debe corresponder al diseño: por ejemplo, a cuántas réplicas hay en el grupo más pequeño. En un ejemplo de edgeR, se retuvieron genes con más de 0,5 CPM en al menos dos bibliotecas porque había dos réplicas por grupo; los autores indican que el criterio debe conservar genes que tengan expresión suficiente en las réplicas de al menos un grupo. (Chen, 2016)
 
-Un criterio demasiado estricto puede excluir genes que se expresan únicamente en una condición, justo los que podrían ser biológicamente interesantes. En un estudio de pastos, filtrar por 1 CPM eliminó todos los transcritos detectados solo en una de las dos subespecies; ese resultado ilustra el riesgo del umbral en ese conjunto de datos, no que 1 CPM sea siempre inadecuado. (Raithel, 2016b)(p7) (p8)
+Un criterio demasiado estricto puede excluir genes que se expresan únicamente en una condición, justo los que podrían ser biológicamente interesantes. En un estudio de pastos, filtrar por 1 CPM eliminó todos los transcritos detectados solo en una de las dos subespecies; ese resultado ilustra el riesgo del umbral en ese conjunto de datos, no que 1 CPM sea siempre inadecuado. (Raithel, 2016b)
 
-En general, el filtrado debe basarse en la cantidad de información de los conteos y no en qué genes parecen cambiar según el contraste, para evitar seleccionar genes usando el resultado que se va a probar. (Chen, 2016)(p6)
+En general, el filtrado debe basarse en la cantidad de información de los conteos y no en qué genes parecen cambiar según el contraste, para evitar seleccionar genes usando el resultado que se va a probar. (Chen, 2016)
 
 ### 2. ¿Qué hace TMM?
 
@@ -448,9 +468,9 @@ El flujo de edgeR permite retirar genes con conteos insuficientes y usa `calcNor
 
 ### 4. ¿Y si el análisis se hace con DESeq2?
 
-**TMM es la normalización habitual de edgeR; DESeq2 usa por defecto su propio método, median-of-ratios.** Ambos estiman factores de escala para modelar diferencias entre muestras, pero no son el mismo procedimiento ni sus factores tienen exactamente la misma interpretación. (Love, 2014)(p2) (Maza, 2016)(p4) (p6)
+**TMM es la normalización habitual de edgeR; DESeq2 usa por defecto su propio método, median-of-ratios.** Ambos estiman factores de escala para modelar diferencias entre muestras, pero no son el mismo procedimiento ni sus factores tienen exactamente la misma interpretación. (Love, 2014) (Maza, 2016)
 
-Por tanto, lo más sencillo es usar **TMM dentro del flujo de edgeR** o la normalización predeterminada de **DESeq2** dentro de su propio flujo. DESeq2 permite que el usuario proporcione factores de normalización calculados por otros métodos. (Love, 2014)(p14)
+Por tanto, lo más sencillo es usar **TMM dentro del flujo de edgeR** o la normalización predeterminada de **DESeq2** dentro de su propio flujo. DESeq2 permite que el usuario proporcione factores de normalización calculados por otros métodos. (Love, 2014)
 
 Si se necesita explícitamente TMM con DESeq2, se puede calcular el tamaño efectivo de biblioteca en edgeR —tamaño de biblioteca × factor TMM— y pasarlo como factores de tamaño reescalados a media geométrica uno:
 
