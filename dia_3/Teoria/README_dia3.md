@@ -276,17 +276,29 @@ En experimentos con cambios globales grandes de ARN, TMM y otros métodos de esc
 
 **Love, M. I., Huber, W., & Anders, S.** (2014). Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. *Genome Biology*, 15(12), 550. https://doi.org/10.1186/s13059-014-0550-8
 
-** Robinson, M. D., & Oshlack, A.** (2010). A scaling normalization method for differential expression analysis of RNA-seq data. *Genome Biology*, 11(3), R25. https://doi.org/10.1186/gb-2010-11-3-r25
+**Robinson, M. D., & Oshlack, A.** (2010). A scaling normalization method for differential expression analysis of RNA-seq data. *Genome Biology*, 11(3), R25. https://doi.org/10.1186/gb-2010-11-3-r25
+
 **Soneson, C., Love, M. I., & Robinson, M. D.** (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. *F1
+
 **Anders, S., & Huber, W.** (2010). Differential expression analysis for sequence count data. *Genome Biology*, 11(10), R106.
+
 **Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L.** (2016). Near-optimal probabilistic RNA-seq quantification. *Nature Biotechnology*, 34(5), 525–527.
+
 **Dobin, A., Davis, C. A., Schlesinger, F., Drenkow, J., Zaleski, C., Jha, S., Batut, P., Chaisson, M., & Gingeras, T. R.** (2013). STAR: ultrafast universal RNA-seq aligner. *Bioinformatics*, 29(1), 15–21.
+
 **Kim, D., Paggi, J. M., Park, C., Bennett, C., & Salzberg, S. L.** (2019). Graph-based genome alignment and genotyping with HISAT2 and HISAT-genotype. *Nature Biotechnology*, 37(8), 907–915.
+
 **Li, B., Ruotti, V., Stewart, R. M., Thomson, J. A., & Dewey, C. N.** (2010). RNA-Seq gene expression estimation with or without a genome reference. *BMC Bioinformatics*, 11(1), 400.
+
 **Mortazavi, A., Williams, B. A., McCue, K., Schaeffer, L., & Wold, B.** (2008). Mapping and quantifying mammalian transcriptomes by RNA-Seq. *Nature Methods*, 5(7), 621–628.
+
 **Patro, R., Duggal, G., Love, M. I., Irizarry, R. A., & Kingsford, C.** (2017). Salmon provides fast and bias-aware transcript expression estimates. *Nature Methods*, 14(4), 417–419.
+
 **Robinson, M. D., & Oshlack, A.** (2010). A scaling normalization method for differential expression analysis of RNA-seq data. *Genome Biology*, 11(3), R25.
+
 **Soneson, C., Love, M. I., & Robinson, M. D.** (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. *F1000Research*, 4, 1521.
+
 **Trapnell, C., Pachter, L., & Salzberg, S. L.** (2009). TopHat: discovering splice junctions with RNA-Seq. *Bioinformatics*, 25(9), 1105–1111.
+
 **Wagner, G. P., Kin, K., & Lynch, V. J.** (2012). Measurement of mRNA abundance using RNA-seq data: RPKM measure is inconsistent among samples. *Theory in Biosciences*, 131(4), 281–285.
 
