@@ -10,6 +10,7 @@
 
 set -euo pipefail
 
+#Workflow para correr fastqc, trimmomatic y multiqc usando bash
 #----------------------------------------
 # 1. Cargar módulos del cluster (solo Java, no Nextflow)
 #----------------------------------------
