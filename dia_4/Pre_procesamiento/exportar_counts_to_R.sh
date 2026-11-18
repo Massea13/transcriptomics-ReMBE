@@ -13,5 +13,5 @@ module swap gnu12 gnu14/14.2.0
 module load R/4.4.1
 export R_LIBS_USER=~/R/4.4
 
-Rscript 00_instalar_paquetes.R
+Rscript 00_instalar_paqueterias.R
 Rscript 00_exportar_counts.R
