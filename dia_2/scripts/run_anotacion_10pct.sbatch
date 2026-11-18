@@ -13,6 +13,8 @@ set -e
 
 cd "$SLURM_SUBMIT_DIR"
 
+#Anotación con TransDecoder y eggnog_env
+
 # 1. Crear ligas simbólicas al ensamblado previo
 mkdir -p ensamblado_10pct anotacion_10pct
 ln -sf /scratch/marco/fastq/bioproject_985763/Trinity_10pct_final.fasta ensamblado_10pct/
