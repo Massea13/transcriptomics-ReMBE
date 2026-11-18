@@ -20,4 +20,4 @@ mkdir -p ${R_LIBS_USER}
 # Compila usando los 4 nucleos (mas rapido)
 export MAKEFLAGS="-j4"
 
-Rscript 00_instalar_paquetes.R
+Rscript 00_instalar_paqueterias.R
