@@ -1,9 +1,7 @@
 # =============================================================================
 # 00_exportar_counts.R - Junta las salidas de kallisto en objetos de R
 # Se corre en el servidor del curso (donde estan las carpetas de kallisto):
-#   module load R/4.4.1
-#   export R_LIBS_USER=~/R/4.4
-#   Rscript 00_exportar_counts.R
+#   sbatch R_analisis.sh
 # Luego se copian a RStudio solo los archivos de la carpeta para_RStudio/
 # =============================================================================
 
@@ -11,14 +9,13 @@ library(tximport)
 
 # dropInfReps = TRUE: no lee los bootstraps del abundance.h5 (evita necesitar rhdf5)
 
-KALLISTO_DIR <- "kallisto_conteos"
-SAMPLES      <- "metadata_peces.csv"
+KALLISTO_DIR <- "kallisto_counts"
+METADATOS    <- "metadata_peces.csv"
 OUT_DIR      <- "para_RStudio"
-
 
 dir.create(OUT_DIR, showWarnings = FALSE)
 
-meta  <- read.csv(SAMPLES, header=TRUE)
+meta  <- read.csv(METADATOS)
 files <- file.path(KALLISTO_DIR, meta$sample_id, "abundance.tsv")
 names(files) <- meta$sample_id
 stopifnot(all(file.exists(files)))
@@ -38,6 +35,6 @@ write.table(data.frame(transcrito = rownames(txi$counts), txi$counts, check.name
 write.table(data.frame(transcrito = rownames(txi$abundance), txi$abundance, check.names = FALSE),
             file.path(OUT_DIR, "TPM.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
 
-file.copy(SAMPLES, OUT_DIR, overwrite = TRUE)
+file.copy(METADATOS, OUT_DIR, overwrite = TRUE)
 
 message("Listo. Copia la carpeta ", OUT_DIR, "/ al servidor de RStudio.")
