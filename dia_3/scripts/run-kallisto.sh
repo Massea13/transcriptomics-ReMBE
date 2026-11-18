@@ -3,8 +3,8 @@
 #SBATCH -p short                      # Partición (short para pruebas/taller)
 #SBATCH -c 4                          # Número de hilos (CPUs por tarea)
 #SBATCH --mem=8G                     # Memoria RAM solicitada (16G para sort y BWA)
-#SBATCH -o ../error-data-outs/bwa-oyamel_%j.out      # Archivo de salida estándar
-#SBATCH -e ../error-data-outs/bwa-oyamel_%j.err      # Archivo de errores
+#SBATCH -o ../error-data-outs/kallisto-oyamel_%j.out      # Archivo de salida estándar
+#SBATCH -e ../error-data-outs/kallisto-oyamel_%j.err      # Archivo de errores
 
 # ==============================================================================
 # PASO 1: Iniciar Conda y activar el ambiente compartido
