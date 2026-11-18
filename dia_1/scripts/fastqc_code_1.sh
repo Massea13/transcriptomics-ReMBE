@@ -10,6 +10,7 @@
 
 set -euo pipefail
 
+#Workflow para correr en paralelo fastqc, trimmomatic y multiqc usando Netxflow
 #----------------------------------------
 # 1. Cargar módulos del cluster
 #----------------------------------------
