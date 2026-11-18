@@ -10,7 +10,7 @@ library(tximport)
 # dropInfReps = TRUE: no lee los bootstraps del abundance.h5 (evita necesitar rhdf5)
 
 KALLISTO_DIR <- "kallisto_counts"
-METADATOS    <- "metadata_peces.csv"
+METADATOS    <- "../metadata_peces.csv"
 OUT_DIR      <- "para_RStudio"
 
 dir.create(OUT_DIR, showWarnings = FALSE)
