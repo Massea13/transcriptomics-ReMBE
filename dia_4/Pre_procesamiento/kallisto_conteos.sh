@@ -18,7 +18,7 @@ source activate trinity_taller
 
 # --- Parámetros ---
 TRANSCRIPTOME="/scratch/taller/datos_pez/transcriptoma_completo/GKNI01.1.fsa_nt.gz"
-TRIMMED="trimmed"
+TRIMMED="/scratch/taller/datos_pez/trimmed"
 OUT_DIR="kallisto_conteos"
 INDEX="${OUT_DIR}/transcriptoma.idx"
 THREADS="${SLURM_CPUS_PER_TASK:-4}"
