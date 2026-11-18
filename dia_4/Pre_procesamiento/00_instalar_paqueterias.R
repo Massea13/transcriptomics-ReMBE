@@ -1,34 +1,30 @@
 # =============================================================================
-# 00_instalar_paquetes.R - Revisa e instala los paquetes del analisis en R
-# Uso: Rscript 00_instalar_paquetes.R   (o corre todo en RStudio)
-# Solo instala lo que falte; si ya esta todo, no hace nada.
+# 00_instalar_paquetes.R - Instala los paquetes de R que se usan EN EL SERVIDOR
+# Uso: sbatch instalar_paquetes.sh   (una sola vez)
+# En el servidor solo se corre 00_exportar_counts.R, que necesita tximport.
+# DESeq2, edgeR, ggplot2 y pheatmap se usan en RStudio, no aqui.
 # =============================================================================
 
-paquetes_cran <- c("ggplot2", "pheatmap")
-paquetes_bioc <- c("tximport", "DESeq2", "apeglm")
+.libPaths()   # La primera ruta debe ser ~/R/4.4
+
+paquetes <- c("tximport")
 
 # BiocManager es el instalador de los paquetes de Bioconductor
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager", repos = "https://cloud.r-project.org")
 }
 
-faltan_cran <- paquetes_cran[!sapply(paquetes_cran, requireNamespace, quietly = TRUE)]
-faltan_bioc <- paquetes_bioc[!sapply(paquetes_bioc, requireNamespace, quietly = TRUE)]
-
-if (length(faltan_cran) > 0) {
-  install.packages(faltan_cran, repos = "https://cloud.r-project.org")
-}
-if (length(faltan_bioc) > 0) {
-  BiocManager::install(faltan_bioc, update = FALSE, ask = FALSE)
+faltan <- paquetes[!sapply(paquetes, requireNamespace, quietly = TRUE)]
+if (length(faltan) > 0) {
+  BiocManager::install(faltan, update = FALSE, ask = FALSE)
 }
 
 # Reporte final
-todos <- c(paquetes_cran, paquetes_bioc)
-estado <- sapply(todos, requireNamespace, quietly = TRUE)
-print(data.frame(paquete = todos, instalado = estado, row.names = NULL))
+estado <- sapply(paquetes, requireNamespace, quietly = TRUE)
+print(data.frame(paquete = paquetes, instalado = estado, row.names = NULL))
 
 if (all(estado)) {
   message("Todo listo.")
 } else {
-  message("Faltan: ", paste(todos[!estado], collapse = ", "))
+  message("Faltan: ", paste(paquetes[!estado], collapse = ", "))
 }
