@@ -48,12 +48,13 @@ barplot(colSums(txi$counts) / 1e6, names.arg = meta$Sample,
 # -------------------------
 dds <- DESeqDataSetFromTximport(txi, colData = meta, design = ~ condition)
 
-# Filtro: al menos 10 cuentas en tantas muestras como el grupo mas pequeno
+# Filtro: al menos 10 counts en tantas muestras como el grupo mas pequeno. Elimina lo que no tenga al menos 10 counts
 keep <- rowSums(counts(dds) >= 10) >= min(table(meta$condition))
 table(keep)
 dds  <- dds[keep, ]
 
-dds <- DESeq(dds)
+#Corriendo Deseq2
+dds <- DESeq(dds)  #modelo binomial negativo
 vsd <- vst(dds, blind = FALSE)
 
 # -------------------------
@@ -102,7 +103,7 @@ write.table(sig, file.path(OUT_DIR, "DE_significativos.tsv"),
 nrow(sig)
 
 # -------------------------
-# 7. Figura 4: heatmap de los 50 transcritos mas significativos
+# 7. Figura 4: heatmap de los 50 transcritos mas significativos. Puedo visualizar más transcritos si lo deseo
 # -------------------------
 # res_df ya esta ordenado por padj; si hay pocos significativos, usa los 50 primeros
 top <- head(res_df$transcrito, 50)
